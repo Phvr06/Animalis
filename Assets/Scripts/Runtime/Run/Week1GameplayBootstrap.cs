@@ -39,6 +39,7 @@ namespace Animalis.Run
             PlayerAvatarView avatar = playerInstance.GetComponent<PlayerAvatarView>();
             AutoWeaponController autoWeapon = playerInstance.GetComponent<AutoWeaponController>();
             PlayerExperience experience = playerInstance.GetComponent<PlayerExperience>();
+            RunFlowController runFlow = FindFirstObjectByType<RunFlowController>();
 
             if (stats != null)
             {
@@ -58,6 +59,11 @@ namespace Animalis.Run
             if (hud != null && stats != null && experience != null)
             {
                 hud.Bind(stats, experience);
+            }
+
+            if (runFlow != null)
+            {
+                runFlow.RegisterPlayer(playerInstance);
             }
         }
 
