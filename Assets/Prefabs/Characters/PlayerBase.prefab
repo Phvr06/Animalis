@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 9209009071998052873}
   - component: {fileID: 2773946970515929296}
   - component: {fileID: 273646587059357964}
+  - component: {fileID: 1381238275225166817}
   m_Layer: 0
   m_Name: PlayerBase
   m_TagString: Player
@@ -184,6 +185,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Player.PlayerAvatarView
   targetRenderer: {fileID: 8105483786612211300}
   visualRoot: {fileID: 2561847354584976460}
+--- !u!114 &1381238275225166817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1825252516004880071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 972fcdaddec44072a22ed12966bc7e27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Animalis.Player.PlayerDirectionalAnimator
+  body: {fileID: 2805411897669328061}
+  animator: {fileID: 6657774704685870048}
+  movingThreshold: 0.05
+  idleState: FoxIdle
+  walkDownState: FoxWalkDown
+  walkUpState: FoxWalkUp
+  walkLeftState: FoxWalkLeft
+  walkRightState: FoxWalkRight
 --- !u!1 &2403342689239238258
 GameObject:
   m_ObjectHideFlags: 0
@@ -194,6 +215,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2561847354584976460}
   - component: {fileID: 8105483786612211300}
+  - component: {fileID: 6657774704685870048}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -273,5 +295,27 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
+--- !u!95 &6657774704685870048
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2403342689239238258}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: c44cb2a2cbe170a42b1fe6da03298941, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

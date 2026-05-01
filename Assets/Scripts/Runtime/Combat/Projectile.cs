@@ -9,13 +9,18 @@ namespace Animalis.Combat
     {
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private Collider2D hitCollider;
+        [SerializeField] private ProjectileParticleVisual particleVisual;
+        [Min(0f)]
+        [SerializeField] private float releaseDelay = 1.1f;
 
         private Action<Projectile> _release;
         private GameObject _owner;
         private float _damage;
         private float _speed;
         private float _remainingLifetime;
+        private float _releaseTimer;
         private Vector2 _direction;
+        private bool _isReleasing;
 
         public void Launch(WeaponDefinition definition, Vector2 origin, Vector2 direction, GameObject owner, Action<Projectile> release)
         {
@@ -26,11 +31,19 @@ namespace Animalis.Combat
             _damage = definition.ProjectileDamage;
             _speed = definition.ProjectileSpeed;
             _remainingLifetime = definition.ProjectileLifetime;
+            _releaseTimer = 0f;
             _direction = direction.normalized;
+            _isReleasing = false;
+
+            if (hitCollider != null)
+            {
+                hitCollider.enabled = true;
+            }
 
             transform.position = origin;
             transform.right = _direction;
-            transform.localScale = new Vector3(definition.ProjectileScale.x, definition.ProjectileScale.y, 1f);
+            float zScale = Mathf.Max(definition.ProjectileScale.x, definition.ProjectileScale.y);
+            transform.localScale = new Vector3(definition.ProjectileScale.x, definition.ProjectileScale.y, zScale);
 
             if (spriteRenderer != null)
             {
@@ -61,6 +74,17 @@ namespace Animalis.Combat
 
         private void Update()
         {
+            if (_isReleasing)
+            {
+                _releaseTimer -= Time.deltaTime;
+                if (_releaseTimer <= 0f)
+                {
+                    ReleaseNow();
+                }
+
+                return;
+            }
+
             transform.position += (Vector3)(_direction * (_speed * Time.deltaTime));
             _remainingLifetime -= Time.deltaTime;
 
@@ -72,7 +96,7 @@ namespace Animalis.Combat
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (!gameObject.activeSelf)
+            if (!gameObject.activeSelf || _isReleasing)
             {
                 return;
             }
@@ -93,6 +117,29 @@ namespace Animalis.Combat
         }
 
         private void Release()
+        {
+            if (_isReleasing)
+            {
+                return;
+            }
+
+            _isReleasing = true;
+            _releaseTimer = releaseDelay;
+
+            if (hitCollider != null)
+            {
+                hitCollider.enabled = false;
+            }
+
+            particleVisual?.StopEmitting();
+
+            if (_releaseTimer <= 0f)
+            {
+                ReleaseNow();
+            }
+        }
+
+        private void ReleaseNow()
         {
             gameObject.SetActive(false);
             _release?.Invoke(this);
@@ -118,6 +165,11 @@ namespace Animalis.Combat
             if (hitCollider == null)
             {
                 hitCollider = GetComponent<Collider2D>();
+            }
+
+            if (particleVisual == null)
+            {
+                particleVisual = GetComponent<ProjectileParticleVisual>();
             }
         }
     }
