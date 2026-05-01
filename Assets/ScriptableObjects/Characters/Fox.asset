@@ -18,6 +18,6 @@ MonoBehaviour:
   moveSpeed: 5
   pickupRadius: 1.25
   startingWeapon: {fileID: 11400000, guid: 743feefb314800c7d869762fc3e8ac9c, type: 2}
-  worldSprite: {fileID: 21300000, guid: 9079721bcc85949e7ac006fbc109e5e0, type: 3}
-  worldColor: {r: 0.95, g: 0.55, b: 0.2, a: 1}
-  worldScale: {x: 0.8, y: 0.8}
+  worldSprite: {fileID: 3115849327415049667, guid: e8005b59495d4a7459b7bcfdab387bc4, type: 3}
+  worldColor: {r: 1, g: 1, b: 1, a: 1}
+  worldScale: {x: 5, y: 5}
