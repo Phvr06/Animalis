@@ -2,52 +2,35 @@ using Animalis.Core;
 using Animalis.Pickups;
 using Animalis.Run;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace Animalis.Enemies
 {
     public sealed class EnemySpawnDirector : MonoBehaviour
     {
-        private const string DefaultEnemyAssetPath = "Assets/ScriptableObjects/Enemies/FarmhandWeek1.asset";
-        private const string DefaultPickupPrefabPath = "Assets/Prefabs/Pickups/ExperiencePickup.prefab";
-
         [Header("References")]
+        [SerializeField] private GameplayConfiguration configuration;
         [SerializeField] private RunFlowController runFlow;
         [SerializeField] private Transform target;
         [SerializeField] private Transform enemyParent;
         [SerializeField] private Transform pickupParent;
-        [SerializeField] private EnemyDefinition defaultEnemy;
-        [SerializeField] private EnemyController enemyPrefab;
-        [SerializeField] private ExperiencePickup experiencePickupPrefab;
-
-        [Header("Spawn Timing")]
-        [Min(0.2f)]
-        [SerializeField] private float startingSpawnInterval = 2.5f;
-        [Min(0.2f)]
-        [SerializeField] private float minimumSpawnInterval = 0.8f;
-        [Min(0f)]
-        [SerializeField] private float intervalRampPerMinute = 0.55f;
-        [Min(1)]
-        [SerializeField] private int startingMaxAlive = 10;
-        [Min(0)]
-        [SerializeField] private int extraAlivePerMinute = 6;
-
-        [Header("Spawn Area")]
-        [Min(1f)]
-        [SerializeField] private float spawnRadius = 9f;
-        [Min(1f)]
-        [SerializeField] private float spawnJitter = 2f;
 
         private float _spawnTimer;
         private int _aliveCount;
 
-        private bool CanSpawn => target != null && (runFlow == null || runFlow.IsRunActive || Time.timeScale > 0f);
+        private RunDefinition RunDefinition => configuration != null ? configuration.RunDefinition : null;
+        private EnemyDefinition DefaultEnemy => configuration != null ? configuration.DefaultEnemy : null;
+        private EnemyController EnemyPrefab => configuration != null ? configuration.EnemyPrefab : null;
+        private ExperiencePickup ExperiencePickupPrefab => configuration != null ? configuration.ExperiencePickupPrefab : null;
+        private bool CanSpawn => target != null && DefaultEnemy != null && (runFlow == null || runFlow.IsRunActive || Time.timeScale > 0f);
+
+        public void Configure(GameplayConfiguration gameplayConfiguration, Transform playerTarget)
+        {
+            configuration = gameplayConfiguration;
+            target = playerTarget != null ? playerTarget : target;
+        }
 
         private void Start()
         {
-            ResolveAssetReferencesInEditor();
             ResolveSceneReferences();
             _spawnTimer = 0.5f;
         }
@@ -91,14 +74,14 @@ namespace Animalis.Enemies
                 direction = Vector2.right;
             }
 
-            float distance = spawnRadius + Random.Range(0f, spawnJitter);
+            float distance = GetSpawnRadius() + Random.Range(0f, GetSpawnJitter());
             Vector3 position = target.position + (Vector3)(direction * distance);
-            EnemyController enemy = enemyPrefab != null
-                ? Instantiate(enemyPrefab, position, Quaternion.identity, enemyParent)
+            EnemyController enemy = EnemyPrefab != null
+                ? Instantiate(EnemyPrefab, position, Quaternion.identity, enemyParent)
                 : CreateRuntimeEnemy(position);
 
-            enemy.name = defaultEnemy != null ? defaultEnemy.DisplayName : "Farmhand";
-            enemy.Initialize(defaultEnemy, target, experiencePickupPrefab, pickupParent);
+            enemy.name = DefaultEnemy != null ? DefaultEnemy.DisplayName : "Enemy";
+            enemy.Initialize(DefaultEnemy, target, ExperiencePickupPrefab, pickupParent);
             enemy.Died += HandleEnemyDied;
             _aliveCount++;
         }
@@ -123,7 +106,7 @@ namespace Animalis.Enemies
 
             SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
             renderer.sprite = PlaceholderVisualFactory.GetSquareSprite();
-            renderer.color = defaultEnemy != null ? defaultEnemy.WorldColor : new Color(0.78f, 0.22f, 0.18f, 1f);
+            renderer.color = DefaultEnemy != null ? DefaultEnemy.WorldColor : new Color(0.78f, 0.22f, 0.18f, 1f);
             renderer.sortingOrder = 8;
 
             return root.AddComponent<EnemyController>();
@@ -131,13 +114,30 @@ namespace Animalis.Enemies
 
         private int GetMaxAlive(float elapsed)
         {
+            RunDefinition runDefinition = RunDefinition;
+            int startingMaxAlive = runDefinition != null ? runDefinition.StartingMaxAlive : 10;
+            int extraAlivePerMinute = runDefinition != null ? runDefinition.ExtraAlivePerMinute : 6;
             return startingMaxAlive + Mathf.FloorToInt(elapsed / 60f) * extraAlivePerMinute;
         }
 
         private float GetSpawnInterval(float elapsed)
         {
+            RunDefinition runDefinition = RunDefinition;
+            float startingSpawnInterval = runDefinition != null ? runDefinition.StartingSpawnInterval : 2.5f;
+            float minimumSpawnInterval = runDefinition != null ? runDefinition.MinimumSpawnInterval : 0.8f;
+            float intervalRampPerMinute = runDefinition != null ? runDefinition.IntervalRampPerMinute : 0.55f;
             float minutes = elapsed / 60f;
             return Mathf.Max(minimumSpawnInterval, startingSpawnInterval - minutes * intervalRampPerMinute);
+        }
+
+        private float GetSpawnRadius()
+        {
+            return RunDefinition != null ? RunDefinition.SpawnRadius : 9f;
+        }
+
+        private float GetSpawnJitter()
+        {
+            return RunDefinition != null ? RunDefinition.SpawnJitter : 2f;
         }
 
         private void HandleEnemyDied(EnemyController enemy)
@@ -183,36 +183,12 @@ namespace Animalis.Enemies
 
         private void Reset()
         {
-            ResolveAssetReferencesInEditor();
             ResolveSceneReferences();
         }
 
         private void OnValidate()
         {
-            startingSpawnInterval = Mathf.Max(0.2f, startingSpawnInterval);
-            minimumSpawnInterval = Mathf.Max(0.2f, minimumSpawnInterval);
-            startingMaxAlive = Mathf.Max(1, startingMaxAlive);
-            spawnRadius = Mathf.Max(1f, spawnRadius);
-            spawnJitter = Mathf.Max(1f, spawnJitter);
-            ResolveAssetReferencesInEditor();
             ResolveSceneReferences();
-        }
-
-        [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        private void ResolveAssetReferencesInEditor()
-        {
-#if UNITY_EDITOR
-            if (defaultEnemy == null)
-            {
-                defaultEnemy = AssetDatabase.LoadAssetAtPath<EnemyDefinition>(DefaultEnemyAssetPath);
-            }
-
-            if (experiencePickupPrefab == null)
-            {
-                GameObject pickupPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultPickupPrefabPath);
-                experiencePickupPrefab = pickupPrefab != null ? pickupPrefab.GetComponent<ExperiencePickup>() : null;
-            }
-#endif
         }
     }
 }

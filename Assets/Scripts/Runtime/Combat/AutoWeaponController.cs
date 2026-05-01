@@ -18,7 +18,6 @@ namespace Animalis.Combat
 
         private IObjectPool<Projectile> _projectilePool;
         private WeaponDefinition _weaponDefinition;
-        private Projectile _runtimeProjectileTemplate;
         private float _cooldown;
 
         public void Initialize(CharacterDefinition definition, Transform runtimeProjectileParent)
@@ -151,55 +150,25 @@ namespace Animalis.Combat
 
         private WeaponDefinition ResolveWeaponDefinition(CharacterDefinition definition)
         {
-            Sprite fallbackSprite = PlaceholderVisualFactory.GetSquareSprite();
-            Projectile fallbackProjectilePrefab = CreateRuntimeProjectileTemplate(fallbackSprite);
-
-            if (definition == null || definition.StartingWeapon == null)
+            if (definition == null)
             {
-                return WeaponDefinition.CreateFallback(fallbackProjectilePrefab, fallbackSprite);
+                Debug.LogWarning("Auto weapon controller requires a character definition.", this);
+                return null;
             }
 
-            return definition.StartingWeapon.CreateResolvedCopy(fallbackProjectilePrefab, fallbackSprite);
-        }
-
-        private Projectile CreateRuntimeProjectileTemplate(Sprite sprite)
-        {
-            if (_runtimeProjectileTemplate != null)
+            if (definition.StartingWeapon == null)
             {
-                return _runtimeProjectileTemplate;
+                Debug.LogWarning($"Character '{definition.DisplayName}' has no starting weapon assigned.", this);
+                return null;
             }
 
-            GameObject root = new("RuntimeProjectileTemplate");
-            root.hideFlags = HideFlags.HideAndDontSave;
-            root.SetActive(false);
-            root.transform.SetParent(projectileParent, false);
-
-            CircleCollider2D collider = root.AddComponent<CircleCollider2D>();
-            collider.isTrigger = true;
-            collider.radius = 0.12f;
-
-            Rigidbody2D body = root.AddComponent<Rigidbody2D>();
-            body.bodyType = RigidbodyType2D.Kinematic;
-            body.gravityScale = 0f;
-
-            GameObject visual = new("Visual");
-            visual.transform.SetParent(root.transform, false);
-
-            SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
-            renderer.sprite = sprite;
-            renderer.color = new Color(0.75f, 0.95f, 1f, 1f);
-            renderer.sortingOrder = 15;
-
-            _runtimeProjectileTemplate = root.AddComponent<Projectile>();
-            return _runtimeProjectileTemplate;
-        }
-
-        private void OnDestroy()
-        {
-            if (_runtimeProjectileTemplate != null)
+            if (definition.StartingWeapon.ProjectilePrefab == null)
             {
-                Destroy(_runtimeProjectileTemplate.gameObject);
+                Debug.LogWarning($"Weapon '{definition.StartingWeapon.DisplayName}' has no projectile prefab assigned.", this);
+                return null;
             }
+
+            return definition.StartingWeapon;
         }
 
         private void OnDrawGizmosSelected()

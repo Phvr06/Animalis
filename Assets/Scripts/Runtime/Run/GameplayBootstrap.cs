@@ -1,59 +1,58 @@
 using Animalis.Characters;
 using Animalis.Combat;
+using Animalis.Enemies;
 using Animalis.Player;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 namespace Animalis.Run
 {
-    public sealed class Week1GameplayBootstrap : MonoBehaviour
+    public sealed class GameplayBootstrap : MonoBehaviour
     {
-        private const string DefaultCharacterAssetPath = "Assets/ScriptableObjects/Characters/FoxWeek1.asset";
-        private const string DefaultPlayerPrefabPath = "Assets/Prefabs/Characters/PlayerPlaceholder.prefab";
-
-        [SerializeField] private CharacterDefinition defaultCharacter;
-        [SerializeField] private GameObject playerPrefab;
+        [SerializeField] private GameplayConfiguration configuration;
         [SerializeField] private Transform playerSpawnPoint;
         [SerializeField] private Transform playerParent;
         [SerializeField] private Transform projectileParent;
         [SerializeField] private GameplayHud hud;
+        [SerializeField] private RunFlowController runFlow;
+        [SerializeField] private EnemySpawnDirector enemySpawnDirector;
 
         private void Start()
         {
-            ResolveAssetReferencesInEditor();
             ResolveSceneReferences();
 
-            if (defaultCharacter == null || playerPrefab == null)
+            if (configuration == null || configuration.StartingCharacter == null || configuration.PlayerPrefab == null)
             {
-                Debug.LogWarning("Week1 bootstrap is missing character data or player prefab.", this);
+                Debug.LogWarning("Gameplay bootstrap is missing configuration, character data, or player prefab.", this);
                 return;
             }
 
             Vector3 spawnPosition = playerSpawnPoint != null ? playerSpawnPoint.position : Vector3.zero;
-            GameObject playerInstance = Instantiate(playerPrefab, spawnPosition, Quaternion.identity, playerParent);
-            playerInstance.name = $"{defaultCharacter.DisplayName} Player";
+            GameObject playerInstance = Instantiate(configuration.PlayerPrefab, spawnPosition, Quaternion.identity, playerParent);
+            playerInstance.name = $"{configuration.StartingCharacter.DisplayName} Player";
 
             PlayerStatsRuntime stats = playerInstance.GetComponent<PlayerStatsRuntime>();
             PlayerAvatarView avatar = playerInstance.GetComponent<PlayerAvatarView>();
             AutoWeaponController autoWeapon = playerInstance.GetComponent<AutoWeaponController>();
             PlayerExperience experience = playerInstance.GetComponent<PlayerExperience>();
-            RunFlowController runFlow = FindFirstObjectByType<RunFlowController>();
 
             if (stats != null)
             {
-                stats.Initialize(defaultCharacter);
+                stats.Initialize(configuration.StartingCharacter);
             }
 
             if (avatar != null)
             {
-                avatar.Apply(defaultCharacter);
+                avatar.Apply(configuration.StartingCharacter);
             }
 
             if (autoWeapon != null)
             {
-                autoWeapon.Initialize(defaultCharacter, projectileParent);
+                autoWeapon.Initialize(configuration.StartingCharacter, projectileParent);
+            }
+
+            if (experience != null)
+            {
+                experience.Initialize(configuration.RunDefinition);
             }
 
             if (hud != null && stats != null && experience != null)
@@ -63,13 +62,18 @@ namespace Animalis.Run
 
             if (runFlow != null)
             {
+                runFlow.Configure(configuration.RunDefinition);
                 runFlow.RegisterPlayer(playerInstance);
+            }
+
+            if (enemySpawnDirector != null)
+            {
+                enemySpawnDirector.Configure(configuration, playerInstance.transform);
             }
         }
 
         private void Reset()
         {
-            ResolveAssetReferencesInEditor();
             ResolveSceneReferences();
         }
 
@@ -97,28 +101,21 @@ namespace Animalis.Run
             {
                 hud = FindFirstObjectByType<GameplayHud>();
             }
+
+            if (runFlow == null)
+            {
+                runFlow = FindFirstObjectByType<RunFlowController>();
+            }
+
+            if (enemySpawnDirector == null)
+            {
+                enemySpawnDirector = FindFirstObjectByType<EnemySpawnDirector>();
+            }
         }
 
         private void OnValidate()
         {
-            ResolveAssetReferencesInEditor();
             ResolveSceneReferences();
-        }
-
-        [System.Diagnostics.Conditional("UNITY_EDITOR")]
-        private void ResolveAssetReferencesInEditor()
-        {
-#if UNITY_EDITOR
-            if (defaultCharacter == null)
-            {
-                defaultCharacter = AssetDatabase.LoadAssetAtPath<CharacterDefinition>(DefaultCharacterAssetPath);
-            }
-
-            if (playerPrefab == null)
-            {
-                playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultPlayerPrefabPath);
-            }
-#endif
         }
     }
 }

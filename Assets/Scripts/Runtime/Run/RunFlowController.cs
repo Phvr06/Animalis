@@ -9,7 +9,7 @@ namespace Animalis.Run
     {
         [SerializeField] private Camera followCamera;
         [SerializeField] private TMP_Text defeatText;
-        [SerializeField] private bool pauseOnDefeat = true;
+        [SerializeField] private RunDefinition runDefinition;
 
         private PlayerHealth _playerHealth;
 
@@ -17,6 +17,11 @@ namespace Animalis.Run
 
         public bool IsRunActive { get; private set; } = true;
         public float ElapsedSeconds { get; private set; }
+
+        public void Configure(RunDefinition definition)
+        {
+            runDefinition = definition;
+        }
 
         public void RegisterPlayer(GameObject player)
         {
@@ -129,7 +134,7 @@ namespace Animalis.Run
                 defeatText.gameObject.SetActive(true);
             }
 
-            if (pauseOnDefeat && !victory)
+            if ((runDefinition == null || runDefinition.PauseOnDefeat) && !victory)
             {
                 Time.timeScale = 0f;
             }

@@ -12,9 +12,9 @@ namespace Animalis.Combat
         [SerializeField] private string displayName = "Wind Blades";
 
         [Header("Projectile")]
-        [Tooltip("Prefab instantiated by the auto-weapon system. If empty, a runtime fallback projectile is created.")]
+        [Tooltip("Prefab instantiated by the auto-weapon system.")]
         [SerializeField] private Projectile projectilePrefab;
-        [Tooltip("Optional projectile sprite. If empty, a runtime square placeholder is used.")]
+        [Tooltip("Optional projectile sprite override. If empty, the prefab visual keeps its current sprite.")]
         [SerializeField] private Sprite projectileSprite;
         [Tooltip("Tint applied to the projectile renderer.")]
         [SerializeField] private Color projectileColor = new(0.75f, 0.95f, 1f, 1f);
@@ -62,46 +62,6 @@ namespace Animalis.Combat
             projectileDamage = Mathf.Max(0.1f, projectileDamage);
             fireInterval = Mathf.Max(0.05f, fireInterval);
             targetRange = Mathf.Max(0.5f, targetRange);
-        }
-
-        public WeaponDefinition CreateResolvedCopy(Projectile fallbackProjectilePrefab, Sprite fallbackProjectileSprite)
-        {
-            WeaponDefinition copy = CreateInstance<WeaponDefinition>();
-            bool isUsingFallbackProjectile = projectilePrefab == null;
-            bool isUsingFallbackSprite = projectileSprite == null;
-            copy.weaponId = weaponId;
-            copy.displayName = displayName;
-            copy.projectilePrefab = isUsingFallbackProjectile ? fallbackProjectilePrefab : projectilePrefab;
-            copy.projectileSprite = isUsingFallbackSprite ? fallbackProjectileSprite : projectileSprite;
-            copy.projectileColor = projectileColor;
-            copy.projectileScale = isUsingFallbackSprite
-                ? new Vector2(Mathf.Max(projectileScale.x, 0.7f), Mathf.Max(projectileScale.y, 0.24f))
-                : projectileScale;
-            copy.projectileSpeed = isUsingFallbackProjectile ? Mathf.Min(projectileSpeed, 9f) : projectileSpeed;
-            copy.projectileLifetime = isUsingFallbackProjectile ? Mathf.Max(projectileLifetime, 2f) : projectileLifetime;
-            copy.projectileDamage = projectileDamage;
-            copy.fireInterval = fireInterval;
-            copy.targetRange = targetRange;
-            copy.muzzleOffset = muzzleOffset;
-            return copy;
-        }
-
-        public static WeaponDefinition CreateFallback(Projectile fallbackProjectilePrefab, Sprite fallbackProjectileSprite)
-        {
-            WeaponDefinition fallback = CreateInstance<WeaponDefinition>();
-            fallback.weaponId = "fallback_wind_blades";
-            fallback.displayName = "Fallback Wind Blades";
-            fallback.projectilePrefab = fallbackProjectilePrefab;
-            fallback.projectileSprite = fallbackProjectileSprite;
-            fallback.projectileColor = new Color(0.75f, 0.95f, 1f, 1f);
-            fallback.projectileScale = new Vector2(0.8f, 0.3f);
-            fallback.projectileSpeed = 9f;
-            fallback.projectileLifetime = 2.2f;
-            fallback.projectileDamage = 2f;
-            fallback.fireInterval = 0.45f;
-            fallback.targetRange = 8f;
-            fallback.muzzleOffset = new Vector2(0.45f, 0f);
-            return fallback;
         }
     }
 }

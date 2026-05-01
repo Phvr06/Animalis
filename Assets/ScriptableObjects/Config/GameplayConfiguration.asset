@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9112ef313acfe4520b441bd4884ca1c3, type: 3}
+  m_Name: GameplayConfiguration
+  m_EditorClassIdentifier: Assembly-CSharp::Animalis.Run.GameplayConfiguration
+  startingCharacter: {fileID: 11400000, guid: ca97e7e19bfd3dcc3a1e5f92b5fac670, type: 2}
+  playerPrefab: {fileID: 1825252516004880071, guid: 6b12e4f623b3c4e319701f0564ff8d59, type: 3}
+  defaultEnemy: {fileID: 11400000, guid: 12e75fab68deae6499b8e96e62ab0c20, type: 2}
+  enemyPrefab: {fileID: 4808555209759163165, guid: fd7810bcb5f98a0dc9b45758a8e67fd4, type: 3}
+  experiencePickupPrefab: {fileID: 2016601622985627030, guid: 54afb46166d7b935580ce6adc470eed9, type: 3}
+  runDefinition: {fileID: 11400000, guid: 6cb5b22773228e72ab9ba3e2df5700d0, type: 2}

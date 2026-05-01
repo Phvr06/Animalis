@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 2773946970515929296}
   - component: {fileID: 273646587059357964}
   m_Layer: 0
-  m_Name: PlayerPlaceholder
+  m_Name: PlayerBase
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -155,8 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db017f37d90796c2ebd8fdf43d69b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Run.PlayerExperience
-  baseExperienceForLevel: 5
-  growthFactor: 1.3
+  runDefinition: {fileID: 11400000, guid: 6cb5b22773228e72ab9ba3e2df5700d0, type: 2}
 --- !u!114 &2773946970515929296
 MonoBehaviour:
   m_ObjectHideFlags: 0
