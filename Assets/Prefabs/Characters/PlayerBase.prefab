@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 387e949666f542ba78f645cf9ebaae8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Player.PlayerHealth
-  stats: {fileID: 0}
+  stats: {fileID: 7594541034483554992}
 --- !u!114 &9209009071998052873
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,7 +156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db017f37d90796c2ebd8fdf43d69b334, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Run.PlayerExperience
-  runDefinition: {fileID: 11400000, guid: 6cb5b22773228e72ab9ba3e2df5700d0, type: 2}
+  runDefinition: {fileID: 0}
 --- !u!114 &2773946970515929296
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ffefd082edb823af9037aee1c97f3c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Combat.AutoWeaponController
-  stats: {fileID: 0}
+  stats: {fileID: 7594541034483554992}
   projectileParent: {fileID: 0}
 --- !u!114 &273646587059357964
 MonoBehaviour:

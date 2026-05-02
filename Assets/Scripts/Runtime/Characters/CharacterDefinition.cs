@@ -1,17 +1,12 @@
+using Animalis.Content;
 using Animalis.Combat;
 using UnityEngine;
 
 namespace Animalis.Characters
 {
-    [CreateAssetMenu(menuName = "Animalis/Characters/Character Definition", fileName = "CharacterDefinition")]
-    public sealed class CharacterDefinition : ScriptableObject
+    [CreateAssetMenu(menuName = "Animalis/Data/Character", fileName = "NewCharacter")]
+    public sealed class CharacterDefinition : ContentDefinition
     {
-        [Header("Identity")]
-        [Tooltip("Stable id used by code and unlock logic.")]
-        [SerializeField] private string characterId = "fox";
-        [Tooltip("Name shown in UI and debug labels.")]
-        [SerializeField] private string displayName = "Fox";
-
         [Header("Gameplay")]
         [Min(1f)]
         [Tooltip("Maximum life of the character.")]
@@ -33,8 +28,7 @@ namespace Animalis.Characters
         [Tooltip("World scale of the visual child object.")]
         [SerializeField] private Vector2 worldScale = new(0.8f, 0.8f);
 
-        public string CharacterId => characterId;
-        public string DisplayName => displayName;
+        public string CharacterId => ContentId;
         public float MaxHealth => maxHealth;
         public float MoveSpeed => moveSpeed;
         public float PickupRadius => pickupRadius;
@@ -45,6 +39,7 @@ namespace Animalis.Characters
 
         private void OnValidate()
         {
+            ValidateIdentity();
             maxHealth = Mathf.Max(1f, maxHealth);
             moveSpeed = Mathf.Max(0.1f, moveSpeed);
             pickupRadius = Mathf.Max(0f, pickupRadius);

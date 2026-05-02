@@ -1,4 +1,5 @@
 using Animalis.Characters;
+using Animalis.Content;
 using Animalis.Enemies;
 using Animalis.Pickups;
 using UnityEngine;
@@ -8,6 +9,10 @@ namespace Animalis.Run
     [CreateAssetMenu(menuName = "Animalis/Run/Gameplay Configuration", fileName = "GameplayConfiguration")]
     public sealed class GameplayConfiguration : ScriptableObject
     {
+        [Header("Catalog")]
+        [Tooltip("Optional registry of all available characters, weapons and enemies. Useful for future menus, unlocks and validation.")]
+        [SerializeField] private ContentCatalog contentCatalog;
+
         [Header("Player")]
         [Tooltip("Character data used when gameplay starts. Future character selection can swap this reference.")]
         [SerializeField] private CharacterDefinition startingCharacter;
@@ -17,15 +22,16 @@ namespace Animalis.Run
         [Header("Enemies")]
         [Tooltip("Enemy data used by the spawn director.")]
         [SerializeField] private EnemyDefinition defaultEnemy;
-        [Tooltip("Enemy prefab instantiated by the spawn director. If empty, a runtime placeholder enemy is created.")]
+        [Tooltip("Enemy prefab instantiated by the spawn director.")]
         [SerializeField] private EnemyController enemyPrefab;
-        [Tooltip("Pickup prefab spawned when enemies die. If empty, a runtime placeholder pickup is created.")]
+        [Tooltip("Pickup prefab spawned when enemies die.")]
         [SerializeField] private ExperiencePickup experiencePickupPrefab;
 
         [Header("Run")]
         [Tooltip("Shared tuning for progression, defeat flow, and enemy spawn pacing.")]
         [SerializeField] private RunDefinition runDefinition;
 
+        public ContentCatalog ContentCatalog => contentCatalog;
         public CharacterDefinition StartingCharacter => startingCharacter;
         public GameObject PlayerPrefab => playerPrefab;
         public EnemyDefinition DefaultEnemy => defaultEnemy;

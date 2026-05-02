@@ -11,13 +11,19 @@ namespace Animalis.Run
         [SerializeField] private TMP_Text levelText;
         [SerializeField] private TMP_Text experienceText;
 
+        private PlayerStatsRuntime _boundStats;
+        private PlayerExperience _boundExperience;
+
         public void Bind(PlayerStatsRuntime stats, PlayerExperience experience)
         {
+            UnbindCurrent();
+
             if (stats != null)
             {
                 SetCharacterName(stats.Definition != null ? stats.Definition.DisplayName : "Player");
                 UpdateHealth(stats.CurrentHealth, stats.MaxHealth);
                 stats.HealthChanged += UpdateHealth;
+                _boundStats = stats;
             }
 
             if (experience != null)
@@ -26,6 +32,7 @@ namespace Animalis.Run
                 UpdateExperience(experience.CurrentExperience, experience.ExperienceToNextLevel);
                 experience.LevelChanged += UpdateLevel;
                 experience.ExperienceChanged += UpdateExperience;
+                _boundExperience = experience;
             }
         }
 
@@ -80,6 +87,27 @@ namespace Animalis.Run
                         experienceText = textComponent;
                         break;
                 }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            UnbindCurrent();
+        }
+
+        private void UnbindCurrent()
+        {
+            if (_boundStats != null)
+            {
+                _boundStats.HealthChanged -= UpdateHealth;
+                _boundStats = null;
+            }
+
+            if (_boundExperience != null)
+            {
+                _boundExperience.LevelChanged -= UpdateLevel;
+                _boundExperience.ExperienceChanged -= UpdateExperience;
+                _boundExperience = null;
             }
         }
     }

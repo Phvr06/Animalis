@@ -11,6 +11,38 @@ namespace Animalis.Combat
         [SerializeField] private SpriteRenderer coreRenderer;
         [SerializeField] private bool restartOnEnable = true;
 
+        public void ApplyColor(Color tint)
+        {
+            ResolveReferences();
+
+            if (coreRenderer != null)
+            {
+                coreRenderer.color = tint;
+            }
+
+            if (trail != null)
+            {
+                trail.startColor = tint;
+                trail.endColor = tint;
+            }
+
+            if (particleSystems == null)
+            {
+                return;
+            }
+
+            foreach (ParticleSystem particleSystem in particleSystems)
+            {
+                if (particleSystem == null)
+                {
+                    continue;
+                }
+
+                ParticleSystem.MainModule main = particleSystem.main;
+                main.startColor = tint;
+            }
+        }
+
         public void StopEmitting()
         {
             ResolveReferences();

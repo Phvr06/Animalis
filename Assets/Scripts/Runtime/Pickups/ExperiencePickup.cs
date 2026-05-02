@@ -11,6 +11,13 @@ namespace Animalis.Pickups
         [Tooltip("XP granted when the player collects this pickup.")]
         [SerializeField] private int experienceValue = 1;
 
+        public int ExperienceValue => experienceValue;
+
+        public void SetExperienceValue(int value)
+        {
+            experienceValue = Mathf.Max(1, value);
+        }
+
         private void Reset()
         {
             Collider2D pickupCollider = GetComponent<Collider2D>();

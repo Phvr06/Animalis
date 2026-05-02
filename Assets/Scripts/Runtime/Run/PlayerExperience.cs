@@ -5,7 +5,7 @@ namespace Animalis.Run
 {
     public sealed class PlayerExperience : MonoBehaviour
     {
-        [SerializeField] private RunDefinition runDefinition;
+        [SerializeField, HideInInspector] private RunDefinition runDefinition;
 
         public event Action<int> LevelChanged;
         public event Action<int, int> ExperienceChanged;
@@ -18,10 +18,19 @@ namespace Animalis.Run
         public void Initialize(RunDefinition definition)
         {
             runDefinition = definition;
+            CurrentLevel = 1;
+            CurrentExperience = 0;
+            NotifyChanged();
         }
 
         public void AddExperience(int amount)
         {
+            if (runDefinition == null)
+            {
+                Debug.LogWarning("Player experience requires a RunDefinition before XP can be added.", this);
+                return;
+            }
+
             if (amount <= 0)
             {
                 return;
@@ -43,13 +52,18 @@ namespace Animalis.Run
         private void Start()
         {
             CurrentLevel = Mathf.Max(1, CurrentLevel);
-            ExperienceChanged?.Invoke(CurrentExperience, ExperienceToNextLevel);
-            LevelChanged?.Invoke(CurrentLevel);
+            NotifyChanged();
         }
 
         private void OnValidate()
         {
             CurrentLevel = Mathf.Max(1, CurrentLevel);
+        }
+
+        private void NotifyChanged()
+        {
+            ExperienceChanged?.Invoke(CurrentExperience, ExperienceToNextLevel);
+            LevelChanged?.Invoke(CurrentLevel);
         }
     }
 }

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd09c24178743074a91de8399c2fe23c, type: 3}
   m_Name: Farmhand
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Enemies.EnemyDefinition
-  enemyId: farmhand
+  contentId: farmhand
   displayName: Farmhand
-  maxHealth: 4
-  moveSpeed: 2
+  maxHealth: 6
+  moveSpeed: 3
   contactDamage: 1
   contactDamageCooldown: 0.7
   experienceValue: 1

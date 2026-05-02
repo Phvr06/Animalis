@@ -6,7 +6,7 @@ namespace Animalis.Stage
 {
     public sealed class InfiniteChunkMap : MonoBehaviour
     {
-        [SerializeField] private Transform target;
+        [SerializeField, HideInInspector] private Transform target;
         [SerializeField] private Transform chunkParent;
         [Min(4f)]
         [SerializeField] private float chunkSize = 12f;
@@ -18,15 +18,26 @@ namespace Animalis.Stage
         private readonly Dictionary<Vector2Int, GameObject> _chunks = new();
         private Vector2Int _lastCenter = new(int.MinValue, int.MinValue);
 
+        public void SetTarget(Transform runtimeTarget)
+        {
+            target = runtimeTarget;
+            RefreshChunks(force: true);
+        }
+
         private void Start()
         {
-            ResolveReferences();
+            if (chunkParent == null)
+            {
+                Debug.LogWarning("Infinite chunk map requires an explicit chunk parent reference.", this);
+                enabled = false;
+                return;
+            }
+
             RefreshChunks(force: true);
         }
 
         private void Update()
         {
-            ResolveTarget();
             RefreshChunks(force: false);
         }
 
@@ -117,33 +128,6 @@ namespace Animalis.Stage
             return new Vector2Int(
                 Mathf.FloorToInt((position.x + chunkSize * 0.5f) / chunkSize),
                 Mathf.FloorToInt((position.y + chunkSize * 0.5f) / chunkSize));
-        }
-
-        private void ResolveReferences()
-        {
-            if (chunkParent == null)
-            {
-                GameObject environment = GameObject.Find("Environment");
-                chunkParent = environment != null ? environment.transform : transform;
-            }
-
-            ResolveTarget();
-        }
-
-        private void ResolveTarget()
-        {
-            if (target != null)
-            {
-                return;
-            }
-
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            target = player != null ? player.transform : null;
-        }
-
-        private void Reset()
-        {
-            ResolveReferences();
         }
     }
 }

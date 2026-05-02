@@ -1,19 +1,16 @@
+using Animalis.Content;
 using UnityEngine;
 
 namespace Animalis.Combat
 {
-    [CreateAssetMenu(menuName = "Animalis/Combat/Weapon Definition", fileName = "WeaponDefinition")]
-    public sealed class WeaponDefinition : ScriptableObject
+    [CreateAssetMenu(menuName = "Animalis/Data/Weapon", fileName = "NewWeapon")]
+    public sealed class WeaponDefinition : ContentDefinition
     {
-        [Header("Identity")]
-        [Tooltip("Stable id used by code and progression systems.")]
-        [SerializeField] private string weaponId = "wind_blades";
-        [Tooltip("Name shown in UI/debug.")]
-        [SerializeField] private string displayName = "Wind Blades";
-
         [Header("Projectile")]
         [Tooltip("Prefab instantiated by the auto-weapon system.")]
         [SerializeField] private Projectile projectilePrefab;
+        [Tooltip("If disabled, the projectile core sprite is hidden and only the prefab VFX remains visible.")]
+        [SerializeField] private bool useProjectileSprite = true;
         [Tooltip("Optional projectile sprite override. If empty, the prefab visual keeps its current sprite.")]
         [SerializeField] private Sprite projectileSprite;
         [Tooltip("Tint applied to the projectile renderer.")]
@@ -40,9 +37,9 @@ namespace Animalis.Combat
         [Tooltip("Spawn offset of the projectile relative to the player.")]
         [SerializeField] private Vector2 muzzleOffset = new(0.45f, 0f);
 
-        public string WeaponId => weaponId;
-        public string DisplayName => displayName;
+        public string WeaponId => ContentId;
         public Projectile ProjectilePrefab => projectilePrefab;
+        public bool UseProjectileSprite => useProjectileSprite;
         public Sprite ProjectileSprite => projectileSprite;
         public Color ProjectileColor => projectileColor;
         public Vector2 ProjectileScale => projectileScale;
@@ -55,6 +52,7 @@ namespace Animalis.Combat
 
         private void OnValidate()
         {
+            ValidateIdentity();
             projectileScale.x = Mathf.Max(0.05f, projectileScale.x);
             projectileScale.y = Mathf.Max(0.05f, projectileScale.y);
             projectileSpeed = Mathf.Max(0.1f, projectileSpeed);

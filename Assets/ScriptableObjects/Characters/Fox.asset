@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 101dc438c96706023834adf949efef56, type: 3}
   m_Name: Fox
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Characters.CharacterDefinition
-  characterId: fox
+  contentId: fox
   displayName: Fox
   maxHealth: 10
   moveSpeed: 5

@@ -6,7 +6,7 @@ namespace Animalis.Player
 {
     public sealed class PlayerStatsRuntime : MonoBehaviour
     {
-        [SerializeField] private CharacterDefinition definition;
+        [SerializeField, HideInInspector] private CharacterDefinition definition;
 
         public event Action<float, float> HealthChanged;
         public event Action Died;

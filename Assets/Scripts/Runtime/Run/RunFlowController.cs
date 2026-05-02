@@ -37,15 +37,9 @@ namespace Animalis.Run
         {
             Time.timeScale = 1f;
 
-            if (followCamera == null)
+            if (followCamera == null || defeatText == null)
             {
-                followCamera = Camera.main;
-            }
-
-            if (defeatText == null)
-            {
-                GameObject defeatTextObject = GameObject.Find("DefeatText");
-                defeatText = defeatTextObject != null ? defeatTextObject.GetComponent<TMP_Text>() : null;
+                Debug.LogWarning("Run flow controller requires explicit camera and defeat text references.", this);
             }
 
             if (defeatText != null)
@@ -56,8 +50,6 @@ namespace Animalis.Run
 
         private void Update()
         {
-            TryFindPlayer();
-
             if (!IsRunActive)
             {
                 return;
@@ -78,20 +70,6 @@ namespace Animalis.Run
             cameraPosition.x = playerTransform.position.x;
             cameraPosition.y = playerTransform.position.y;
             followCamera.transform.position = cameraPosition;
-        }
-
-        private void TryFindPlayer()
-        {
-            if (_playerHealth != null)
-            {
-                return;
-            }
-
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                BindPlayerHealth(player.GetComponent<PlayerHealth>());
-            }
         }
 
         private void BindPlayerHealth(PlayerHealth playerHealth)

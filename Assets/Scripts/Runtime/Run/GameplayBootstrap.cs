@@ -2,6 +2,7 @@ using Animalis.Characters;
 using Animalis.Combat;
 using Animalis.Enemies;
 using Animalis.Player;
+using Animalis.Stage;
 using UnityEngine;
 
 namespace Animalis.Run
@@ -15,14 +16,12 @@ namespace Animalis.Run
         [SerializeField] private GameplayHud hud;
         [SerializeField] private RunFlowController runFlow;
         [SerializeField] private EnemySpawnDirector enemySpawnDirector;
+        [SerializeField] private InfiniteChunkMap chunkMap;
 
         private void Start()
         {
-            ResolveSceneReferences();
-
-            if (configuration == null || configuration.StartingCharacter == null || configuration.PlayerPrefab == null)
+            if (!HasCriticalReferences())
             {
-                Debug.LogWarning("Gameplay bootstrap is missing configuration, character data, or player prefab.", this);
                 return;
             }
 
@@ -59,63 +58,73 @@ namespace Animalis.Run
             {
                 hud.Bind(stats, experience);
             }
+            else if (hud == null)
+            {
+                Debug.LogWarning("Gameplay bootstrap is missing a HUD reference. Gameplay will continue without HUD binding.", this);
+            }
 
             if (runFlow != null)
             {
                 runFlow.Configure(configuration.RunDefinition);
                 runFlow.RegisterPlayer(playerInstance);
             }
+            else
+            {
+                Debug.LogWarning("Gameplay bootstrap is missing a RunFlowController reference. Camera follow and defeat flow will be unavailable.", this);
+            }
 
             if (enemySpawnDirector != null)
             {
                 enemySpawnDirector.Configure(configuration, playerInstance.transform);
             }
-        }
-
-        private void Reset()
-        {
-            ResolveSceneReferences();
-        }
-
-        private void ResolveSceneReferences()
-        {
-            if (playerSpawnPoint == null)
+            else
             {
-                GameObject spawn = GameObject.Find("PlayerSpawn");
-                playerSpawnPoint = spawn != null ? spawn.transform : null;
+                Debug.LogWarning("Gameplay bootstrap is missing an EnemySpawnDirector reference. Enemy spawning will be unavailable.", this);
             }
 
-            if (playerParent == null)
+            if (chunkMap != null)
             {
-                GameObject actors = GameObject.Find("Actors");
-                playerParent = actors != null ? actors.transform : null;
+                chunkMap.SetTarget(playerInstance.transform);
             }
-
-            if (projectileParent == null)
+            else
             {
-                GameObject projectiles = GameObject.Find("Projectiles");
-                projectileParent = projectiles != null ? projectiles.transform : null;
-            }
-
-            if (hud == null)
-            {
-                hud = FindFirstObjectByType<GameplayHud>();
-            }
-
-            if (runFlow == null)
-            {
-                runFlow = FindFirstObjectByType<RunFlowController>();
-            }
-
-            if (enemySpawnDirector == null)
-            {
-                enemySpawnDirector = FindFirstObjectByType<EnemySpawnDirector>();
+                Debug.LogWarning("Gameplay bootstrap is missing an InfiniteChunkMap reference. Dynamic map generation will be unavailable.", this);
             }
         }
 
-        private void OnValidate()
+        private bool HasCriticalReferences()
         {
-            ResolveSceneReferences();
+            if (configuration == null)
+            {
+                Debug.LogWarning("Gameplay bootstrap is missing a GameplayConfiguration asset.", this);
+                return false;
+            }
+
+            if (configuration.StartingCharacter == null)
+            {
+                Debug.LogWarning("Gameplay bootstrap configuration is missing the starting character.", this);
+                return false;
+            }
+
+            if (configuration.PlayerPrefab == null)
+            {
+                Debug.LogWarning("Gameplay bootstrap configuration is missing the player prefab.", this);
+                return false;
+            }
+
+            if (configuration.RunDefinition == null)
+            {
+                Debug.LogWarning("Gameplay bootstrap configuration is missing the run definition.", this);
+                return false;
+            }
+
+            if (playerSpawnPoint == null || playerParent == null || projectileParent == null)
+            {
+                Debug.LogWarning("Gameplay bootstrap requires explicit scene references for spawn point, actor parent, and projectile parent.", this);
+                return false;
+            }
+
+            return true;
         }
     }
 }

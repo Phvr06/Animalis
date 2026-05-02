@@ -1,43 +1,53 @@
 using System;
 using Animalis.Core;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Animalis.Player
 {
     [RequireComponent(typeof(PlayerStatsRuntime))]
     public sealed class PlayerHealth : MonoBehaviour, IDamageable
     {
-        [SerializeField] private PlayerStatsRuntime stats;
+        [FormerlySerializedAs("stats")]
+        [SerializeField] private PlayerStatsRuntime runtimeStats;
 
         public event Action Died;
 
-        public bool IsAlive => stats != null && stats.IsAlive;
+        public bool IsAlive => runtimeStats != null && runtimeStats.IsAlive;
 
         public void ApplyDamage(DamageData damageData)
         {
-            if (stats == null)
+            if (runtimeStats == null)
             {
                 return;
             }
 
-            stats.TakeDamage(damageData.Amount);
+            runtimeStats.TakeDamage(damageData.Amount);
         }
 
         private void Awake()
         {
-            if (stats == null)
+            if (runtimeStats == null)
             {
-                stats = GetComponent<PlayerStatsRuntime>();
+                runtimeStats = GetComponent<PlayerStatsRuntime>();
             }
 
-            stats.Died += HandleDeath;
+            runtimeStats.Died += HandleDeath;
         }
 
         private void OnDestroy()
         {
-            if (stats != null)
+            if (runtimeStats != null)
             {
-                stats.Died -= HandleDeath;
+                runtimeStats.Died -= HandleDeath;
+            }
+        }
+
+        private void Reset()
+        {
+            if (runtimeStats == null)
+            {
+                runtimeStats = GetComponent<PlayerStatsRuntime>();
             }
         }
 

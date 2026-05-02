@@ -47,17 +47,24 @@ namespace Animalis.Combat
 
             if (spriteRenderer != null)
             {
-                if (definition.ProjectileSprite != null)
+                spriteRenderer.enabled = definition.UseProjectileSprite;
+
+                if (definition.UseProjectileSprite && definition.ProjectileSprite != null)
                 {
                     spriteRenderer.sprite = definition.ProjectileSprite;
                 }
-                else if (spriteRenderer.sprite == null)
+                else if (definition.UseProjectileSprite && spriteRenderer.sprite == null)
                 {
                     spriteRenderer.sprite = PlaceholderVisualFactory.GetSquareSprite();
                 }
 
-                spriteRenderer.color = definition.ProjectileColor;
+                if (definition.UseProjectileSprite)
+                {
+                    spriteRenderer.color = definition.ProjectileColor;
+                }
             }
+
+            particleVisual?.ApplyColor(definition.ProjectileColor);
 
             gameObject.SetActive(true);
         }

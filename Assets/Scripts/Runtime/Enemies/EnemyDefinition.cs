@@ -1,14 +1,11 @@
+using Animalis.Content;
 using UnityEngine;
 
 namespace Animalis.Enemies
 {
-    [CreateAssetMenu(menuName = "Animalis/Enemies/Enemy Definition", fileName = "EnemyDefinition")]
-    public sealed class EnemyDefinition : ScriptableObject
+    [CreateAssetMenu(menuName = "Animalis/Data/Enemy", fileName = "NewEnemy")]
+    public sealed class EnemyDefinition : ContentDefinition
     {
-        [Header("Identity")]
-        [SerializeField] private string enemyId = "farmhand";
-        [SerializeField] private string displayName = "Farmhand";
-
         [Header("Combat")]
         [Min(1f)]
         [SerializeField] private float maxHealth = 4f;
@@ -26,8 +23,7 @@ namespace Animalis.Enemies
         [SerializeField] private Color worldColor = new(0.78f, 0.22f, 0.18f, 1f);
         [SerializeField] private Vector2 worldScale = new(0.72f, 0.72f);
 
-        public string EnemyId => enemyId;
-        public string DisplayName => displayName;
+        public string EnemyId => ContentId;
         public float MaxHealth => maxHealth;
         public float MoveSpeed => moveSpeed;
         public float ContactDamage => contactDamage;
@@ -39,6 +35,7 @@ namespace Animalis.Enemies
 
         private void OnValidate()
         {
+            ValidateIdentity();
             maxHealth = Mathf.Max(1f, maxHealth);
             moveSpeed = Mathf.Max(0.1f, moveSpeed);
             contactDamage = Mathf.Max(0.1f, contactDamage);

@@ -9,11 +9,11 @@ namespace Animalis.Enemies
     [RequireComponent(typeof(Collider2D))]
     public sealed class EnemyController : MonoBehaviour, IDamageable
     {
-        [SerializeField] private EnemyDefinition definition;
+        [SerializeField, HideInInspector] private EnemyDefinition definition;
         [SerializeField] private Rigidbody2D body;
         [SerializeField] private Collider2D hitCollider;
         [SerializeField] private SpriteRenderer spriteRenderer;
-        [SerializeField] private ExperiencePickup experiencePickupPrefab;
+        [SerializeField, HideInInspector] private ExperiencePickup experiencePickupPrefab;
 
         private Transform _target;
         private Transform _pickupParent;
@@ -124,42 +124,17 @@ namespace Animalis.Enemies
 
         private void SpawnExperience()
         {
-            int value = definition != null ? definition.ExperienceValue : 1;
-            for (int i = 0; i < value; i++)
+            if (experiencePickupPrefab == null)
             {
-                Vector2 scatter = UnityEngine.Random.insideUnitCircle * 0.25f;
-                Vector3 spawnPosition = transform.position + (Vector3)scatter;
-
-                if (experiencePickupPrefab != null)
-                {
-                    Instantiate(experiencePickupPrefab, spawnPosition, Quaternion.identity, _pickupParent);
-                    continue;
-                }
-
-                CreateRuntimeExperiencePickup(spawnPosition);
+                Debug.LogWarning("Enemy controller requires an experience pickup prefab to drop XP.", this);
+                return;
             }
-        }
 
-        private void CreateRuntimeExperiencePickup(Vector3 spawnPosition)
-        {
-            GameObject pickup = new("RuntimeExperiencePickup");
-            pickup.transform.SetParent(_pickupParent, false);
-            pickup.transform.position = spawnPosition;
-
-            CircleCollider2D pickupCollider = pickup.AddComponent<CircleCollider2D>();
-            pickupCollider.isTrigger = true;
-            pickupCollider.radius = 0.3f;
-
-            pickup.AddComponent<ExperiencePickup>();
-
-            GameObject visual = new("Visual");
-            visual.transform.SetParent(pickup.transform, false);
-            visual.transform.localScale = new Vector3(0.35f, 0.35f, 1f);
-
-            SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
-            renderer.sprite = PlaceholderVisualFactory.GetSquareSprite();
-            renderer.color = new Color(0.35f, 0.88f, 1f, 1f);
-            renderer.sortingOrder = 5;
+            int value = definition != null ? definition.ExperienceValue : 1;
+            Vector2 scatter = UnityEngine.Random.insideUnitCircle * 0.25f;
+            Vector3 spawnPosition = transform.position + (Vector3)scatter;
+            ExperiencePickup pickup = Instantiate(experiencePickupPrefab, spawnPosition, Quaternion.identity, _pickupParent);
+            pickup.SetExperienceValue(value);
         }
 
         private void ApplyVisuals()
@@ -187,7 +162,6 @@ namespace Animalis.Enemies
         private void OnValidate()
         {
             ResolveReferences();
-            ApplyVisuals();
         }
 
         private void ResolveReferences()

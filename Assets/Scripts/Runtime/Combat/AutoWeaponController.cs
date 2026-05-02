@@ -4,25 +4,28 @@ using Animalis.Core;
 using Animalis.Player;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.Serialization;
 
 namespace Animalis.Combat
 {
     [RequireComponent(typeof(PlayerStatsRuntime))]
     public sealed class AutoWeaponController : MonoBehaviour
     {
-        [SerializeField] private PlayerStatsRuntime stats;
-        [SerializeField] private Transform projectileParent;
+        [FormerlySerializedAs("stats")]
+        [SerializeField] private PlayerStatsRuntime runtimeStats;
+        [SerializeField, HideInInspector] private Transform projectileParent;
 
         private readonly Collider2D[] _targetBuffer = new Collider2D[32];
         private readonly List<Projectile> _activeProjectiles = new();
 
         private IObjectPool<Projectile> _projectilePool;
+        private ContactFilter2D _targetFilter;
         private WeaponDefinition _weaponDefinition;
         private float _cooldown;
 
         public void Initialize(CharacterDefinition definition, Transform runtimeProjectileParent)
         {
-            stats = stats != null ? stats : GetComponent<PlayerStatsRuntime>();
+            runtimeStats = runtimeStats != null ? runtimeStats : GetComponent<PlayerStatsRuntime>();
             projectileParent = runtimeProjectileParent;
             _weaponDefinition = ResolveWeaponDefinition(definition);
 
@@ -37,15 +40,17 @@ namespace Animalis.Combat
 
         private void Awake()
         {
-            if (stats == null)
+            if (runtimeStats == null)
             {
-                stats = GetComponent<PlayerStatsRuntime>();
+                runtimeStats = GetComponent<PlayerStatsRuntime>();
             }
+
+            _targetFilter = ContactFilter2D.noFilter;
         }
 
         private void Update()
         {
-            if (_weaponDefinition == null || _projectilePool == null || stats == null || !stats.IsAlive)
+            if (_weaponDefinition == null || _projectilePool == null || runtimeStats == null || !runtimeStats.IsAlive)
             {
                 return;
             }
@@ -67,7 +72,7 @@ namespace Animalis.Combat
 
         private bool TryFindNearestEnemy(out Vector2 targetPosition)
         {
-            int count = Physics2D.OverlapCircleNonAlloc(transform.position, _weaponDefinition.TargetRange, _targetBuffer);
+            int count = Physics2D.OverlapCircle((Vector2)transform.position, _weaponDefinition.TargetRange, _targetFilter, _targetBuffer);
             float bestDistance = float.MaxValue;
             targetPosition = default;
 
@@ -180,6 +185,22 @@ namespace Animalis.Combat
 
             Gizmos.color = Color.cyan;
             Gizmos.DrawWireSphere(transform.position, _weaponDefinition.TargetRange);
+        }
+
+        private void Reset()
+        {
+            if (runtimeStats == null)
+            {
+                runtimeStats = GetComponent<PlayerStatsRuntime>();
+            }
+        }
+
+        private void OnValidate()
+        {
+            if (runtimeStats == null)
+            {
+                runtimeStats = GetComponent<PlayerStatsRuntime>();
+            }
         }
     }
 }

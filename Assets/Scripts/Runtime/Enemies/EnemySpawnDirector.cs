@@ -1,4 +1,3 @@
-using Animalis.Core;
 using Animalis.Pickups;
 using Animalis.Run;
 using UnityEngine;
@@ -10,7 +9,7 @@ namespace Animalis.Enemies
         [Header("References")]
         [SerializeField] private GameplayConfiguration configuration;
         [SerializeField] private RunFlowController runFlow;
-        [SerializeField] private Transform target;
+        [SerializeField, HideInInspector] private Transform target;
         [SerializeField] private Transform enemyParent;
         [SerializeField] private Transform pickupParent;
 
@@ -21,7 +20,7 @@ namespace Animalis.Enemies
         private EnemyDefinition DefaultEnemy => configuration != null ? configuration.DefaultEnemy : null;
         private EnemyController EnemyPrefab => configuration != null ? configuration.EnemyPrefab : null;
         private ExperiencePickup ExperiencePickupPrefab => configuration != null ? configuration.ExperiencePickupPrefab : null;
-        private bool CanSpawn => target != null && DefaultEnemy != null && (runFlow == null || runFlow.IsRunActive || Time.timeScale > 0f);
+        private bool CanSpawn => target != null && runFlow != null && runFlow.IsRunActive && RunDefinition != null && DefaultEnemy != null && EnemyPrefab != null && ExperiencePickupPrefab != null;
 
         public void Configure(GameplayConfiguration gameplayConfiguration, Transform playerTarget)
         {
@@ -31,14 +30,18 @@ namespace Animalis.Enemies
 
         private void Start()
         {
-            ResolveSceneReferences();
+            if (configuration == null || RunDefinition == null || DefaultEnemy == null || EnemyPrefab == null || ExperiencePickupPrefab == null || runFlow == null || enemyParent == null || pickupParent == null)
+            {
+                Debug.LogWarning("Enemy spawn director requires configuration, run definition, enemy data, enemy prefab, pickup prefab, run flow, enemy parent, and pickup parent.", this);
+                enabled = false;
+                return;
+            }
+
             _spawnTimer = 0.5f;
         }
 
         private void Update()
         {
-            ResolveRuntimeTarget();
-
             if (!CanSpawn)
             {
                 return;
@@ -68,6 +71,13 @@ namespace Animalis.Enemies
 
         private void SpawnEnemy()
         {
+            if (EnemyPrefab == null)
+            {
+                Debug.LogWarning("Enemy spawn director requires an enemy prefab in GameplayConfiguration.", this);
+                enabled = false;
+                return;
+            }
+
             Vector2 direction = Random.insideUnitCircle.normalized;
             if (direction == Vector2.zero)
             {
@@ -76,9 +86,7 @@ namespace Animalis.Enemies
 
             float distance = GetSpawnRadius() + Random.Range(0f, GetSpawnJitter());
             Vector3 position = target.position + (Vector3)(direction * distance);
-            EnemyController enemy = EnemyPrefab != null
-                ? Instantiate(EnemyPrefab, position, Quaternion.identity, enemyParent)
-                : CreateRuntimeEnemy(position);
+            EnemyController enemy = Instantiate(EnemyPrefab, position, Quaternion.identity, enemyParent);
 
             enemy.name = DefaultEnemy != null ? DefaultEnemy.DisplayName : "Enemy";
             enemy.Initialize(DefaultEnemy, target, ExperiencePickupPrefab, pickupParent);
@@ -86,58 +94,25 @@ namespace Animalis.Enemies
             _aliveCount++;
         }
 
-        private EnemyController CreateRuntimeEnemy(Vector3 position)
-        {
-            GameObject root = new("RuntimeEnemy");
-            root.transform.SetParent(enemyParent, false);
-            root.transform.position = position;
-            root.tag = "Enemy";
-
-            Rigidbody2D body = root.AddComponent<Rigidbody2D>();
-            body.gravityScale = 0f;
-            body.freezeRotation = true;
-
-            CircleCollider2D collider = root.AddComponent<CircleCollider2D>();
-            collider.radius = 0.35f;
-            collider.isTrigger = false;
-
-            GameObject visual = new("Visual");
-            visual.transform.SetParent(root.transform, false);
-
-            SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
-            renderer.sprite = PlaceholderVisualFactory.GetSquareSprite();
-            renderer.color = DefaultEnemy != null ? DefaultEnemy.WorldColor : new Color(0.78f, 0.22f, 0.18f, 1f);
-            renderer.sortingOrder = 8;
-
-            return root.AddComponent<EnemyController>();
-        }
-
         private int GetMaxAlive(float elapsed)
         {
-            RunDefinition runDefinition = RunDefinition;
-            int startingMaxAlive = runDefinition != null ? runDefinition.StartingMaxAlive : 10;
-            int extraAlivePerMinute = runDefinition != null ? runDefinition.ExtraAlivePerMinute : 6;
-            return startingMaxAlive + Mathf.FloorToInt(elapsed / 60f) * extraAlivePerMinute;
+            return RunDefinition.StartingMaxAlive + Mathf.FloorToInt(elapsed / 60f) * RunDefinition.ExtraAlivePerMinute;
         }
 
         private float GetSpawnInterval(float elapsed)
         {
-            RunDefinition runDefinition = RunDefinition;
-            float startingSpawnInterval = runDefinition != null ? runDefinition.StartingSpawnInterval : 2.5f;
-            float minimumSpawnInterval = runDefinition != null ? runDefinition.MinimumSpawnInterval : 0.8f;
-            float intervalRampPerMinute = runDefinition != null ? runDefinition.IntervalRampPerMinute : 0.55f;
             float minutes = elapsed / 60f;
-            return Mathf.Max(minimumSpawnInterval, startingSpawnInterval - minutes * intervalRampPerMinute);
+            return Mathf.Max(RunDefinition.MinimumSpawnInterval, RunDefinition.StartingSpawnInterval - minutes * RunDefinition.IntervalRampPerMinute);
         }
 
         private float GetSpawnRadius()
         {
-            return RunDefinition != null ? RunDefinition.SpawnRadius : 9f;
+            return RunDefinition.SpawnRadius;
         }
 
         private float GetSpawnJitter()
         {
-            return RunDefinition != null ? RunDefinition.SpawnJitter : 2f;
+            return RunDefinition.SpawnJitter;
         }
 
         private void HandleEnemyDied(EnemyController enemy)
@@ -148,47 +123,6 @@ namespace Animalis.Enemies
             }
 
             _aliveCount = Mathf.Max(0, _aliveCount - 1);
-        }
-
-        private void ResolveRuntimeTarget()
-        {
-            if (target != null)
-            {
-                return;
-            }
-
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            target = player != null ? player.transform : null;
-        }
-
-        private void ResolveSceneReferences()
-        {
-            if (runFlow == null)
-            {
-                runFlow = FindFirstObjectByType<RunFlowController>();
-            }
-
-            if (enemyParent == null)
-            {
-                GameObject enemies = GameObject.Find("Enemies");
-                enemyParent = enemies != null ? enemies.transform : transform;
-            }
-
-            if (pickupParent == null)
-            {
-                GameObject pickups = GameObject.Find("Pickups");
-                pickupParent = pickups != null ? pickups.transform : null;
-            }
-        }
-
-        private void Reset()
-        {
-            ResolveSceneReferences();
-        }
-
-        private void OnValidate()
-        {
-            ResolveSceneReferences();
         }
     }
 }

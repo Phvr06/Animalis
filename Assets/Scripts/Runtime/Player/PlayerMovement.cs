@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace Animalis.Player
 {
@@ -8,7 +9,8 @@ namespace Animalis.Player
     public sealed class PlayerMovement : MonoBehaviour
     {
         [SerializeField] private Rigidbody2D body;
-        [SerializeField] private PlayerStatsRuntime stats;
+        [FormerlySerializedAs("stats")]
+        [SerializeField] private PlayerStatsRuntime runtimeStats;
 
         private Vector2 _input;
 
@@ -19,9 +21,9 @@ namespace Animalis.Player
                 body = GetComponent<Rigidbody2D>();
             }
 
-            if (stats == null)
+            if (runtimeStats == null)
             {
-                stats = GetComponent<PlayerStatsRuntime>();
+                runtimeStats = GetComponent<PlayerStatsRuntime>();
             }
         }
 
@@ -32,13 +34,13 @@ namespace Animalis.Player
 
         private void FixedUpdate()
         {
-            if (stats == null || !stats.IsAlive)
+            if (runtimeStats == null || !runtimeStats.IsAlive)
             {
                 body.linearVelocity = Vector2.zero;
                 return;
             }
 
-            body.linearVelocity = _input * stats.MoveSpeed;
+            body.linearVelocity = _input * runtimeStats.MoveSpeed;
         }
 
         private static Vector2 ReadMovementInput()
@@ -83,7 +85,7 @@ namespace Animalis.Player
         private void Reset()
         {
             body = GetComponent<Rigidbody2D>();
-            stats = GetComponent<PlayerStatsRuntime>();
+            runtimeStats = GetComponent<PlayerStatsRuntime>();
         }
     }
 }
