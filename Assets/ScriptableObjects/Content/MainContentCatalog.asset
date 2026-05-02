@@ -17,4 +17,6 @@ MonoBehaviour:
   weapons:
   - {fileID: 11400000, guid: 743feefb314800c7d869762fc3e8ac9c, type: 2}
   enemies:
-  - {fileID: 11400000, guid: 12e75fab68deae6499b8e96e62ab0c20, type: 2}
+  - {fileID: 11400000, guid: 2d07a6e2b30a4a35a77983a8a476fa01, type: 2}
+  - {fileID: 11400000, guid: 9f543a6e8db74db6a6e00d6f3e9a6b21, type: 2}
+  - {fileID: 11400000, guid: c2e6b93f05c54ad9b2827fd3640fcabe, type: 2}

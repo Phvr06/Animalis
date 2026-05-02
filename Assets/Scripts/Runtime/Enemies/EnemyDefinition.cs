@@ -23,6 +23,12 @@ namespace Animalis.Enemies
         [SerializeField] private Color worldColor = new(0.78f, 0.22f, 0.18f, 1f);
         [SerializeField] private Vector2 worldScale = new(0.72f, 0.72f);
 
+        [Header("Walk Animation")]
+        [Tooltip("Frames played while the enemy is alive. If empty, World Sprite is used.")]
+        [SerializeField] private Sprite[] walkAnimationFrames;
+        [Min(1f)]
+        [SerializeField] private float walkFramesPerSecond = 12f;
+
         public string EnemyId => ContentId;
         public float MaxHealth => maxHealth;
         public float MoveSpeed => moveSpeed;
@@ -32,6 +38,8 @@ namespace Animalis.Enemies
         public Sprite WorldSprite => worldSprite;
         public Color WorldColor => worldColor;
         public Vector2 WorldScale => worldScale;
+        public Sprite[] WalkAnimationFrames => walkAnimationFrames;
+        public float WalkFramesPerSecond => walkFramesPerSecond;
 
         private void OnValidate()
         {
@@ -43,6 +51,7 @@ namespace Animalis.Enemies
             experienceValue = Mathf.Max(1, experienceValue);
             worldScale.x = Mathf.Max(0.1f, worldScale.x);
             worldScale.y = Mathf.Max(0.1f, worldScale.y);
+            walkFramesPerSecond = Mathf.Max(1f, walkFramesPerSecond);
         }
     }
 }

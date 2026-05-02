@@ -19,6 +19,7 @@ namespace Animalis.Enemies
         private Transform _pickupParent;
         private float _currentHealth;
         private float _contactCooldownRemaining;
+        private float _animationTime;
 
         public event Action<EnemyController> Died;
 
@@ -34,6 +35,7 @@ namespace Animalis.Enemies
             _pickupParent = pickupParent;
             _currentHealth = definition != null ? definition.MaxHealth : 1f;
             _contactCooldownRemaining = 0f;
+            _animationTime = UnityEngine.Random.value * 10f;
 
             ApplyVisuals();
             gameObject.SetActive(true);
@@ -66,6 +68,8 @@ namespace Animalis.Enemies
             {
                 _contactCooldownRemaining -= Time.deltaTime;
             }
+
+            AnimateWalk();
         }
 
         private void FixedUpdate()
@@ -83,6 +87,11 @@ namespace Animalis.Enemies
             Vector2 direction = ((Vector2)_target.position - body.position).normalized;
             float speed = definition != null ? definition.MoveSpeed : 1.5f;
             body.linearVelocity = direction * speed;
+
+            if (spriteRenderer != null && Mathf.Abs(direction.x) > 0.05f)
+            {
+                spriteRenderer.flipX = direction.x < 0f;
+            }
         }
 
         private void OnCollisionStay2D(Collision2D collision)
@@ -144,14 +153,72 @@ namespace Animalis.Enemies
                 return;
             }
 
-            spriteRenderer.sprite = definition != null && definition.WorldSprite != null
-                ? definition.WorldSprite
-                : PlaceholderVisualFactory.GetSquareSprite();
+            Sprite sprite = GetCurrentSprite();
+            spriteRenderer.sprite = sprite;
             spriteRenderer.color = definition != null ? definition.WorldColor : new Color(0.78f, 0.22f, 0.18f, 1f);
             spriteRenderer.sortingOrder = 8;
 
             Vector2 scale = definition != null ? definition.WorldScale : new Vector2(0.72f, 0.72f);
             spriteRenderer.transform.localScale = new Vector3(scale.x, scale.y, 1f);
+            CenterVisual(sprite);
+        }
+
+        private void AnimateWalk()
+        {
+            if (!IsAlive || spriteRenderer == null || definition == null)
+            {
+                return;
+            }
+
+            Sprite[] frames = definition.WalkAnimationFrames;
+            if (frames == null || frames.Length == 0)
+            {
+                return;
+            }
+
+            _animationTime += Time.deltaTime;
+            int frame = Mathf.FloorToInt(_animationTime * definition.WalkFramesPerSecond) % frames.Length;
+            Sprite sprite = frames[frame] != null ? frames[frame] : definition.WorldSprite;
+
+            if (sprite != null && spriteRenderer.sprite != sprite)
+            {
+                spriteRenderer.sprite = sprite;
+                CenterVisual(sprite);
+            }
+        }
+
+        private Sprite GetCurrentSprite()
+        {
+            if (definition != null)
+            {
+                Sprite[] frames = definition.WalkAnimationFrames;
+                if (frames != null && frames.Length > 0 && frames[0] != null)
+                {
+                    return frames[0];
+                }
+
+                if (definition.WorldSprite != null)
+                {
+                    return definition.WorldSprite;
+                }
+            }
+
+            return PlaceholderVisualFactory.GetSquareSprite();
+        }
+
+        private void CenterVisual(Sprite sprite)
+        {
+            if (spriteRenderer == null || sprite == null)
+            {
+                return;
+            }
+
+            Vector3 scale = spriteRenderer.transform.localScale;
+            Vector3 centerOffset = sprite.bounds.center;
+            spriteRenderer.transform.localPosition = new Vector3(
+                -centerOffset.x * scale.x,
+                -centerOffset.y * scale.y,
+                0f);
         }
 
         private void Reset()

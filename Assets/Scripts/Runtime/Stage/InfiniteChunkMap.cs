@@ -6,21 +6,27 @@ namespace Animalis.Stage
 {
     public sealed class InfiniteChunkMap : MonoBehaviour
     {
+        private static readonly Color DefaultBackgroundColor = new(0.31f, 0.50f, 0.23f, 1f);
+
         [SerializeField, HideInInspector] private Transform target;
         [SerializeField] private Transform chunkParent;
         [Min(4f)]
         [SerializeField] private float chunkSize = 12f;
         [Range(1, 3)]
         [SerializeField] private int visibleRadius = 2;
-        [SerializeField] private Color evenChunkColor = new(0.30f, 0.47f, 0.24f, 1f);
-        [SerializeField] private Color oddChunkColor = new(0.25f, 0.42f, 0.20f, 1f);
+        [Tooltip("Editable visual profile for the infinite map. Artists can change colors, sprites, density, and scale here.")]
+        [SerializeField] private MapVisualDefinition visualDefinition;
 
         private readonly Dictionary<Vector2Int, GameObject> _chunks = new();
         private Vector2Int _lastCenter = new(int.MinValue, int.MinValue);
+        private Sprite[] _resolvedDetailSprites;
+        private Sprite[] _resolvedTreeSprites;
+        private Sprite[] _resolvedRockSprites;
 
         public void SetTarget(Transform runtimeTarget)
         {
             target = runtimeTarget;
+            ResolveVisualSprites();
             RefreshChunks(force: true);
         }
 
@@ -33,6 +39,7 @@ namespace Animalis.Stage
                 return;
             }
 
+            ResolveVisualSprites();
             RefreshChunks(force: true);
         }
 
@@ -92,35 +99,25 @@ namespace Animalis.Stage
             GameObject chunk = new($"FarmChunk_{coordinate.x}_{coordinate.y}");
             chunk.transform.SetParent(chunkParent != null ? chunkParent : transform, false);
             chunk.transform.position = new Vector3(coordinate.x * chunkSize, coordinate.y * chunkSize, 1f);
-            chunk.transform.localScale = new Vector3(chunkSize, chunkSize, 1f);
 
-            SpriteRenderer ground = chunk.AddComponent<SpriteRenderer>();
-            ground.sprite = PlaceholderVisualFactory.GetSquareSprite();
-            ground.color = (coordinate.x + coordinate.y) % 2 == 0 ? evenChunkColor : oddChunkColor;
-            ground.sortingOrder = -20;
+            System.Random random = CreateRandom(coordinate, 1301);
 
-            CreateDecoration(chunk.transform, coordinate, new Vector2(-0.3f, 0.34f), new Color(0.42f, 0.28f, 0.12f, 1f), "FencePost");
-            CreateDecoration(chunk.transform, coordinate, new Vector2(0.32f, -0.28f), new Color(0.45f, 0.45f, 0.38f, 1f), "Stone");
+            CreatePlainBackground(chunk.transform);
+            CreateDetails(chunk.transform, coordinate, random);
+            CreatePastureProps(chunk.transform, coordinate, random);
             return chunk;
         }
 
-        private void CreateDecoration(Transform parent, Vector2Int coordinate, Vector2 normalizedOffset, Color color, string label)
+        private void CreatePlainBackground(Transform parent)
         {
-            int hash = Mathf.Abs(coordinate.x * 73856093 ^ coordinate.y * 19349663 ^ label.GetHashCode());
-            if (hash % 3 == 0)
-            {
-                return;
-            }
+            Sprite sprite = visualDefinition != null && visualDefinition.BackgroundSprite != null
+                ? visualDefinition.BackgroundSprite
+                : PlaceholderVisualFactory.GetSquareSprite();
+            GameObject background = CreateSpriteObject(parent, "PlainGrassBackground", sprite, Vector3.zero, BackgroundSortingOrder);
 
-            GameObject decoration = new(label);
-            decoration.transform.SetParent(parent, false);
-            decoration.transform.localPosition = new Vector3(normalizedOffset.x, normalizedOffset.y, -0.02f);
-            decoration.transform.localScale = new Vector3(0.06f, 0.18f, 1f);
-
-            SpriteRenderer renderer = decoration.AddComponent<SpriteRenderer>();
-            renderer.sprite = PlaceholderVisualFactory.GetSquareSprite();
-            renderer.color = color;
-            renderer.sortingOrder = -10;
+            SpriteRenderer renderer = background.GetComponent<SpriteRenderer>();
+            renderer.color = visualDefinition != null ? visualDefinition.BackgroundColor : DefaultBackgroundColor;
+            FitSpriteToWorldWidth(background.transform, sprite, chunkSize);
         }
 
         private Vector2Int WorldToChunk(Vector3 position)
@@ -129,5 +126,182 @@ namespace Animalis.Stage
                 Mathf.FloorToInt((position.x + chunkSize * 0.5f) / chunkSize),
                 Mathf.FloorToInt((position.y + chunkSize * 0.5f) / chunkSize));
         }
+
+        private void CreateDetails(Transform parent, Vector2Int coordinate, System.Random random)
+        {
+            if (_resolvedDetailSprites == null || _resolvedDetailSprites.Length == 0)
+            {
+                return;
+            }
+
+            int cellsPerSide = Mathf.CeilToInt(chunkSize / DetailCellSize);
+            float halfChunk = chunkSize * 0.5f;
+            float firstCellCenter = -halfChunk + DetailCellSize * 0.5f;
+
+            for (int y = 0; y < cellsPerSide; y++)
+            {
+                for (int x = 0; x < cellsPerSide; x++)
+                {
+                    if (random.NextDouble() > DetailChancePerCell)
+                    {
+                        continue;
+                    }
+
+                    Sprite sprite = _resolvedDetailSprites[random.Next(_resolvedDetailSprites.Length)];
+                    float maxOffset = DetailCellSize * DetailCellJitter;
+                    float offsetX = RandomRange(random, -maxOffset, maxOffset);
+                    float offsetY = RandomRange(random, -maxOffset, maxOffset);
+                    Vector3 localPosition = new(
+                        firstCellCenter + x * DetailCellSize + offsetX,
+                        firstCellCenter + y * DetailCellSize + offsetY,
+                        0f);
+
+                    GameObject detail = CreateSpriteObject(parent, $"Detail_{coordinate.x}_{coordinate.y}_{x}_{y}", sprite, localPosition, DetailSortingOrder);
+                    float scale = RandomRange(random, DetailScaleRange);
+                    detail.transform.localScale = new Vector3(scale, scale, 1f);
+
+                    SpriteRenderer renderer = detail.GetComponent<SpriteRenderer>();
+                    renderer.flipX = random.NextDouble() < 0.5;
+                }
+            }
+        }
+
+        private void CreatePastureProps(Transform parent, Vector2Int coordinate, System.Random random)
+        {
+            TryCreateProp(parent, coordinate, random, _resolvedTreeSprites, TreeChancePerChunk, "Tree", TreeScaleRange);
+            TryCreateProp(parent, coordinate, random, _resolvedRockSprites, RockChancePerChunk, "Rock", RockScaleRange);
+
+            if (random.NextDouble() < RockChancePerChunk * ExtraRockChanceMultiplier)
+            {
+                TryCreateProp(parent, coordinate, random, _resolvedRockSprites, 1f, "Rock", RockScaleRange * 0.82f);
+            }
+        }
+
+        private void TryCreateProp(
+            Transform parent,
+            Vector2Int coordinate,
+            System.Random random,
+            Sprite[] sprites,
+            float chance,
+            string label,
+            Vector2 scaleRange)
+        {
+            if (sprites == null || sprites.Length == 0 || random.NextDouble() > chance)
+            {
+                return;
+            }
+
+            Vector3 localPosition = new(
+                RandomRange(random, -chunkSize * PropPlacementRange, chunkSize * PropPlacementRange),
+                RandomRange(random, -chunkSize * PropPlacementRange, chunkSize * PropPlacementRange),
+                0f);
+            Vector3 worldPosition = parent.TransformPoint(localPosition);
+
+            if (worldPosition.sqrMagnitude < StartingAreaPropClearRadius * StartingAreaPropClearRadius)
+            {
+                return;
+            }
+
+            Sprite sprite = sprites[random.Next(sprites.Length)];
+            GameObject prop = CreateSpriteObject(parent, $"{label}_{coordinate.x}_{coordinate.y}", sprite, localPosition, PropSortingOrder);
+            float scale = RandomRange(random, scaleRange);
+            prop.transform.localScale = new Vector3(scale, scale, 1f);
+
+            SpriteRenderer renderer = prop.GetComponent<SpriteRenderer>();
+            renderer.flipX = random.NextDouble() < 0.5;
+        }
+
+        private static GameObject CreateSpriteObject(Transform parent, string label, Sprite sprite, Vector3 localPosition, int sortingOrder)
+        {
+            GameObject spriteObject = new(label);
+            spriteObject.transform.SetParent(parent, false);
+            spriteObject.transform.localPosition = localPosition;
+
+            SpriteRenderer renderer = spriteObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.color = Color.white;
+            renderer.sortingOrder = sortingOrder;
+            return spriteObject;
+        }
+
+        private static void FitSpriteToWorldWidth(Transform spriteTransform, Sprite sprite, float worldWidth)
+        {
+            if (sprite == null || sprite.bounds.size.x <= 0f)
+            {
+                return;
+            }
+
+            float scale = worldWidth / sprite.bounds.size.x;
+            spriteTransform.localScale = new Vector3(scale, scale, 1f);
+        }
+
+        private void ResolveVisualSprites()
+        {
+            _resolvedDetailSprites = RemoveNullSprites(visualDefinition != null ? visualDefinition.DetailSprites : null);
+            _resolvedTreeSprites = RemoveNullSprites(visualDefinition != null ? visualDefinition.TreeSprites : null);
+            _resolvedRockSprites = RemoveNullSprites(visualDefinition != null ? visualDefinition.RockSprites : null);
+        }
+
+        private static Sprite[] RemoveNullSprites(Sprite[] sprites)
+        {
+            if (sprites == null || sprites.Length == 0)
+            {
+                return System.Array.Empty<Sprite>();
+            }
+
+            List<Sprite> usableSprites = new(sprites.Length);
+            for (int i = 0; i < sprites.Length; i++)
+            {
+                if (sprites[i] != null)
+                {
+                    usableSprites.Add(sprites[i]);
+                }
+            }
+
+            return usableSprites.ToArray();
+        }
+
+        private static System.Random CreateRandom(Vector2Int coordinate, int salt)
+        {
+            int seed = BuildSeed(coordinate, salt);
+            return new System.Random(seed);
+        }
+
+        private static int BuildSeed(Vector2Int coordinate, int salt)
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 31 + coordinate.x;
+                hash = hash * 31 + coordinate.y;
+                hash = hash * 31 + salt;
+                return hash & 0x7fffffff;
+            }
+        }
+
+        private static float RandomRange(System.Random random, float min, float max)
+        {
+            return min + (max - min) * (float)random.NextDouble();
+        }
+
+        private static float RandomRange(System.Random random, Vector2 range)
+        {
+            return RandomRange(random, range.x, range.y);
+        }
+
+        private float DetailCellSize => visualDefinition != null ? visualDefinition.DetailCellSize : 1f;
+        private float DetailChancePerCell => visualDefinition != null ? visualDefinition.DetailChancePerCell : 0f;
+        private Vector2 DetailScaleRange => visualDefinition != null ? visualDefinition.DetailScaleRange : Vector2.one;
+        private float DetailCellJitter => visualDefinition != null ? visualDefinition.DetailCellJitter : 0f;
+        private float TreeChancePerChunk => visualDefinition != null ? visualDefinition.TreeChancePerChunk : 0f;
+        private float RockChancePerChunk => visualDefinition != null ? visualDefinition.RockChancePerChunk : 0f;
+        private float ExtraRockChanceMultiplier => visualDefinition != null ? visualDefinition.ExtraRockChanceMultiplier : 0f;
+        private float PropPlacementRange => visualDefinition != null ? visualDefinition.PropPlacementRange : 0.42f;
+        private Vector2 TreeScaleRange => visualDefinition != null ? visualDefinition.TreeScaleRange : Vector2.one;
+        private Vector2 RockScaleRange => visualDefinition != null ? visualDefinition.RockScaleRange : Vector2.one;
+        private float StartingAreaPropClearRadius => visualDefinition != null ? visualDefinition.StartingAreaPropClearRadius : 0f;
+        private int BackgroundSortingOrder => visualDefinition != null ? visualDefinition.BackgroundSortingOrder : -30;
+        private int DetailSortingOrder => visualDefinition != null ? visualDefinition.DetailSortingOrder : -25;
+        private int PropSortingOrder => visualDefinition != null ? visualDefinition.PropSortingOrder : -6;
     }
 }

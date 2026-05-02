@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd09c24178743074a91de8399c2fe23c, type: 3}
+  m_Name: EntSapling
+  m_EditorClassIdentifier: Assembly-CSharp::Animalis.Enemies.EnemyDefinition
+  contentId: ent_sapling
+  displayName: Ent Sapling
+  maxHealth: 5
+  moveSpeed: 2.8
+  contactDamage: 0.9
+  contactDamageCooldown: 0.65
+  experienceValue: 1
+  worldSprite: {fileID: -4314566363685764632, guid: 360bb4cb9c646f9458e2ca1ba2929ad6, type: 3}
+  worldColor: {r: 1, g: 1, b: 1, a: 1}
+  worldScale: {x: 0.38, y: 0.38}
+  walkAnimationFrames:
+  - {fileID: -4314566363685764632, guid: 360bb4cb9c646f9458e2ca1ba2929ad6, type: 3}
+  - {fileID: 7969929488532007648, guid: ad4766b7f8b31824898f7355f0723136, type: 3}
+  - {fileID: 8786653243416524754, guid: df1e04d3c97b44746a5e80090c96cf6b, type: 3}
+  - {fileID: 5662339985359724346, guid: 15c5c019e985d09448c28211f254fea6, type: 3}
+  - {fileID: -4513887161681028236, guid: 2162903b9e01f2b4685d7c51bf333bb4, type: 3}
+  - {fileID: 307490878660583841, guid: d3d7eb927cf26054a8d06ffda6d49a16, type: 3}
+  - {fileID: 1788053808242359262, guid: 0333d1bb469a4a84886a6775c46c399c, type: 3}
+  - {fileID: -6288399738185764442, guid: 8a2c8e0e46884e849b75d32880fdd66b, type: 3}
+  - {fileID: -4816565931374209330, guid: 43780a2db8338954688c1a1a0fdfe821, type: 3}
+  - {fileID: 8015697411731824082, guid: 07a3202e086b16842871794d76a105d6, type: 3}
+  - {fileID: 5087869604955228301, guid: 94d1c957e6e43924a8a4b51158260a23, type: 3}
+  - {fileID: -7875768217203203205, guid: 503b41470eb00564388430ff231773ad, type: 3}
+  - {fileID: 5291109141444250258, guid: 1fe147d9d3e5e934195f217fa06d04cc, type: 3}
+  - {fileID: 3760524937823296454, guid: d25492151ee1536439a74f8652c4b3c1, type: 3}
+  - {fileID: 349385955629749744, guid: 8472d032c3b53ce44996a92e45577a94, type: 3}
+  - {fileID: -5638210664112771019, guid: 4a08913e39568924382b68ec40f5bbf1, type: 3}
+  - {fileID: 148015842690606246, guid: 0baf981376be10948b8fddb0090e6444, type: 3}
+  - {fileID: 5441556456523233181, guid: c192ddfb20f12a1448cc2ee4e026ce03, type: 3}
+  walkFramesPerSecond: 12

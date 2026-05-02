@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd09c24178743074a91de8399c2fe23c, type: 3}
+  m_Name: EntBarkguard
+  m_EditorClassIdentifier: Assembly-CSharp::Animalis.Enemies.EnemyDefinition
+  contentId: ent_barkguard
+  displayName: Ent Barkguard
+  maxHealth: 9
+  moveSpeed: 1.8
+  contactDamage: 1.4
+  contactDamageCooldown: 0.85
+  experienceValue: 2
+  worldSprite: {fileID: 7339157547918420430, guid: aabde6d775c579249b5c21f59cfcc7d1, type: 3}
+  worldColor: {r: 1, g: 1, b: 1, a: 1}
+  worldScale: {x: 0.46, y: 0.46}
+  walkAnimationFrames:
+  - {fileID: 7339157547918420430, guid: aabde6d775c579249b5c21f59cfcc7d1, type: 3}
+  - {fileID: -7079125838335314557, guid: 5871f59dd8cd31a4aaae80cc596b854b, type: 3}
+  - {fileID: -1405307004926750222, guid: c98a2569da7c7c443bad25324978b4b6, type: 3}
+  - {fileID: 6567200368489600848, guid: 8b584cab36e218847b1ee9e67a00b716, type: 3}
+  - {fileID: 3441644701273124775, guid: 87392e797eb6db743a6df165c39bf9c8, type: 3}
+  - {fileID: -3292155927116994666, guid: f1c0cb7549d07534893639e38893571f, type: 3}
+  - {fileID: 5412347001958548283, guid: d7fecb452a6439a4b87154178982f56d, type: 3}
+  - {fileID: 5656224915960455679, guid: e2d522de6b1f0274d8469775b2ff7af4, type: 3}
+  - {fileID: -439976393181711604, guid: b417418f49a6aa6428780eef3caf3685, type: 3}
+  - {fileID: -1200980968830984376, guid: fdd75d9354d737c4ab2383eb4326d3fb, type: 3}
+  - {fileID: 2168428090773608628, guid: b61de9645d21c2949926b4251b82ba1c, type: 3}
+  - {fileID: 8283245523101944570, guid: 84de4ce80de9e804281f9f8529e60378, type: 3}
+  - {fileID: -8662928675150270450, guid: 412d2fbe49ab06d4fbdc3514b0e093cf, type: 3}
+  - {fileID: -9162495309566610313, guid: 545fea2c5b6be2240bd4f035b3d7df28, type: 3}
+  - {fileID: 7917762910344753295, guid: 4eaf3835f91fd564eb5da138cabaf3bd, type: 3}
+  - {fileID: 61764839998788422, guid: d6c03d64660303c4c8bca1f323da4785, type: 3}
+  - {fileID: -2617166359691190418, guid: 99e069bef6083bf4eaa7329ceeef92d8, type: 3}
+  - {fileID: -860468396700323942, guid: c128fad46a92ff946b243e3e6d61e9a3, type: 3}
+  walkFramesPerSecond: 10

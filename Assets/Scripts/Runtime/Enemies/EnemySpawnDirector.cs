@@ -18,6 +18,7 @@ namespace Animalis.Enemies
 
         private RunDefinition RunDefinition => configuration != null ? configuration.RunDefinition : null;
         private EnemyDefinition DefaultEnemy => configuration != null ? configuration.DefaultEnemy : null;
+        private EnemyDefinition[] EnemyPool => configuration != null ? configuration.EnemyPool : null;
         private EnemyController EnemyPrefab => configuration != null ? configuration.EnemyPrefab : null;
         private ExperiencePickup ExperiencePickupPrefab => configuration != null ? configuration.ExperiencePickupPrefab : null;
         private bool CanSpawn => target != null && runFlow != null && runFlow.IsRunActive && RunDefinition != null && DefaultEnemy != null && EnemyPrefab != null && ExperiencePickupPrefab != null;
@@ -87,11 +88,32 @@ namespace Animalis.Enemies
             float distance = GetSpawnRadius() + Random.Range(0f, GetSpawnJitter());
             Vector3 position = target.position + (Vector3)(direction * distance);
             EnemyController enemy = Instantiate(EnemyPrefab, position, Quaternion.identity, enemyParent);
+            EnemyDefinition selectedEnemy = PickEnemyDefinition();
 
-            enemy.name = DefaultEnemy != null ? DefaultEnemy.DisplayName : "Enemy";
-            enemy.Initialize(DefaultEnemy, target, ExperiencePickupPrefab, pickupParent);
+            enemy.name = selectedEnemy != null ? selectedEnemy.DisplayName : "Enemy";
+            enemy.Initialize(selectedEnemy, target, ExperiencePickupPrefab, pickupParent);
             enemy.Died += HandleEnemyDied;
             _aliveCount++;
+        }
+
+        private EnemyDefinition PickEnemyDefinition()
+        {
+            if (EnemyPool == null || EnemyPool.Length == 0)
+            {
+                return DefaultEnemy;
+            }
+
+            int startIndex = Random.Range(0, EnemyPool.Length);
+            for (int i = 0; i < EnemyPool.Length; i++)
+            {
+                EnemyDefinition candidate = EnemyPool[(startIndex + i) % EnemyPool.Length];
+                if (candidate != null)
+                {
+                    return candidate;
+                }
+            }
+
+            return DefaultEnemy;
         }
 
         private int GetMaxAlive(float elapsed)

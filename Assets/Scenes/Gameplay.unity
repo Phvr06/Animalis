@@ -860,8 +860,7 @@ MonoBehaviour:
   chunkParent: {fileID: 384547725}
   chunkSize: 12
   visibleRadius: 2
-  evenChunkColor: {r: 0.3, g: 0.47, b: 0.24, a: 1}
-  oddChunkColor: {r: 0.25, g: 0.42, b: 0.2, a: 1}
+  visualDefinition: {fileID: 11400000, guid: d1c5b81f9ae64d64b8bde43406081522, type: 2}
 --- !u!1 &1170865441
 GameObject:
   m_ObjectHideFlags: 0

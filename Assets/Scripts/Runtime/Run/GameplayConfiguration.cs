@@ -22,6 +22,8 @@ namespace Animalis.Run
         [Header("Enemies")]
         [Tooltip("Enemy data used by the spawn director.")]
         [SerializeField] private EnemyDefinition defaultEnemy;
+        [Tooltip("Enemy variants that can spawn during the run. If empty, Default Enemy is used.")]
+        [SerializeField] private EnemyDefinition[] enemyPool;
         [Tooltip("Enemy prefab instantiated by the spawn director.")]
         [SerializeField] private EnemyController enemyPrefab;
         [Tooltip("Pickup prefab spawned when enemies die.")]
@@ -35,6 +37,7 @@ namespace Animalis.Run
         public CharacterDefinition StartingCharacter => startingCharacter;
         public GameObject PlayerPrefab => playerPrefab;
         public EnemyDefinition DefaultEnemy => defaultEnemy;
+        public EnemyDefinition[] EnemyPool => enemyPool;
         public EnemyController EnemyPrefab => enemyPrefab;
         public ExperiencePickup ExperiencePickupPrefab => experiencePickupPrefab;
         public RunDefinition RunDefinition => runDefinition;

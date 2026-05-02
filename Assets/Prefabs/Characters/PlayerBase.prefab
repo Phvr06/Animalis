@@ -130,7 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Player.PlayerMovement
   body: {fileID: 2805411897669328061}
-  stats: {fileID: 7594541034483554992}
+  runtimeStats: {fileID: 7594541034483554992}
 --- !u!114 &6010629441670274022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 387e949666f542ba78f645cf9ebaae8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Player.PlayerHealth
-  stats: {fileID: 7594541034483554992}
+  runtimeStats: {fileID: 7594541034483554992}
 --- !u!114 &9209009071998052873
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ffefd082edb823af9037aee1c97f3c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Combat.AutoWeaponController
-  stats: {fileID: 7594541034483554992}
+  runtimeStats: {fileID: 7594541034483554992}
   projectileParent: {fileID: 0}
 --- !u!114 &273646587059357964
 MonoBehaviour:
@@ -295,7 +295,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!95 &6657774704685870048
 Animator:
