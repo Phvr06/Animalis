@@ -205,4 +205,5 @@ MonoBehaviour:
   body: {fileID: 539011538343970091}
   hitCollider: {fileID: 4575367560529207029}
   spriteRenderer: {fileID: 1180933723896307268}
+  statusController: {fileID: 0}
   experiencePickupPrefab: {fileID: 0}

@@ -48,9 +48,9 @@ namespace Animalis.Run
         {
             Time.timeScale = 1f;
 
-            if (followCamera == null || defeatText == null)
+            if (followCamera == null)
             {
-                Debug.LogWarning("Run flow controller requires explicit camera and defeat text references.", this);
+                Debug.LogWarning("Run flow controller requires an explicit camera reference.", this);
             }
 
             if (defeatText != null)
@@ -122,32 +122,13 @@ namespace Animalis.Run
 
             IsRunActive = false;
 
-            if (defeatText != null)
-            {
-                defeatText.text = victory
-                    ? BuildVictoryMessage()
-                    : $"DERROTA\nSobreviveu {Mathf.FloorToInt(ElapsedSeconds)}s";
-                defeatText.gameObject.SetActive(true);
-            }
-
             if (victory)
             {
                 StageProgressionService.RegisterStageVictory(_currentStage);
-                Time.timeScale = 0f;
             }
 
-            if ((runDefinition == null || runDefinition.PauseOnDefeat) && !victory)
-            {
-                Time.timeScale = 0f;
-            }
-
+            Time.timeScale = 0f;
             RunEnded?.Invoke(victory, ElapsedSeconds);
-        }
-
-        private string BuildVictoryMessage()
-        {
-            string stageName = _currentStage != null ? _currentStage.DisplayName : "Mapa";
-            return $"VITÓRIA\n{stageName} concluído em {Mathf.FloorToInt(ElapsedSeconds)}s";
         }
 
         private void OnDestroy()

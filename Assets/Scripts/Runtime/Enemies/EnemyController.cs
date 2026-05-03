@@ -1,4 +1,5 @@
 using System;
+using Animalis.Combat;
 using Animalis.Core;
 using Animalis.Pickups;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace Animalis.Enemies
         [SerializeField] private Rigidbody2D body;
         [SerializeField] private Collider2D hitCollider;
         [SerializeField] private SpriteRenderer spriteRenderer;
+        [SerializeField, HideInInspector] private ElementalStatusController statusController;
         [SerializeField, HideInInspector] private ExperiencePickup experiencePickupPrefab;
 
         private Transform _target;
@@ -126,6 +128,7 @@ namespace Animalis.Enemies
         private void Die()
         {
             body.linearVelocity = Vector2.zero;
+            statusController?.TryTriggerBurnDeathExplosion();
             SpawnExperience();
             Died?.Invoke(this);
             Destroy(gameObject);
@@ -246,6 +249,16 @@ namespace Animalis.Enemies
             if (spriteRenderer == null)
             {
                 spriteRenderer = GetComponentInChildren<SpriteRenderer>(true);
+            }
+
+            if (statusController == null)
+            {
+                statusController = GetComponent<ElementalStatusController>();
+            }
+
+            if (statusController == null && Application.isPlaying)
+            {
+                statusController = gameObject.AddComponent<ElementalStatusController>();
             }
 
             if (body != null)

@@ -17,6 +17,7 @@ MonoBehaviour:
   maxHealth: 10
   moveSpeed: 5
   pickupRadius: 1.25
+  affinity: 1
   startingWeapon: {fileID: 11400000, guid: 743feefb314800c7d869762fc3e8ac9c, type: 2}
   worldSprite: {fileID: 3115849327415049667, guid: e8005b59495d4a7459b7bcfdab387bc4, type: 3}
   worldColor: {r: 1, g: 1, b: 1, a: 1}

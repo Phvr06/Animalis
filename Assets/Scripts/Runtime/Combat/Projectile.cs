@@ -15,23 +15,28 @@ namespace Animalis.Combat
 
         private Action<Projectile> _release;
         private GameObject _owner;
+        private WeaponRuntimeState _weaponState;
         private float _damage;
         private float _speed;
         private float _remainingLifetime;
         private float _releaseTimer;
+        private float _trailTimer;
         private Vector2 _direction;
         private bool _isReleasing;
 
-        public void Launch(WeaponDefinition definition, Vector2 origin, Vector2 direction, GameObject owner, Action<Projectile> release)
+        public void Launch(WeaponRuntimeState weaponState, Vector2 origin, Vector2 direction, GameObject owner, Action<Projectile> release)
         {
             ResolveReferences();
 
+            WeaponDefinition definition = weaponState.Definition;
+            _weaponState = weaponState;
             _owner = owner;
             _release = release;
-            _damage = definition.ProjectileDamage;
+            _damage = weaponState.DirectDamage;
             _speed = definition.ProjectileSpeed;
             _remainingLifetime = definition.ProjectileLifetime;
             _releaseTimer = 0f;
+            _trailTimer = 0f;
             _direction = direction.normalized;
             _isReleasing = false;
 
@@ -94,6 +99,7 @@ namespace Animalis.Combat
 
             transform.position += (Vector3)(_direction * (_speed * Time.deltaTime));
             _remainingLifetime -= Time.deltaTime;
+            UpdateFireTrail();
 
             if (_remainingLifetime <= 0f)
             {
@@ -119,8 +125,31 @@ namespace Animalis.Combat
                 return;
             }
 
+            if (other.CompareTag("Enemy"))
+            {
+                ElementalStatusController status = other.GetComponentInParent<ElementalStatusController>();
+                status?.ApplyBurn(_owner, _weaponState);
+            }
+
             damageable.ApplyDamage(new DamageData(_owner, _damage, transform.position, _direction));
             Release();
+        }
+
+        private void UpdateFireTrail()
+        {
+            if (_weaponState == null || _weaponState.Definition == null || !_weaponState.FireTrailEnabled)
+            {
+                return;
+            }
+
+            _trailTimer -= Time.deltaTime;
+            if (_trailTimer > 0f)
+            {
+                return;
+            }
+
+            _trailTimer = _weaponState.Definition.FireTrailSpawnInterval;
+            FireTrailZone.Spawn(transform.position, _weaponState, _owner);
         }
 
         private void Release()

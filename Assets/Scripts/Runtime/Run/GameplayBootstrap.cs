@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Animalis.Characters;
 using Animalis.Combat;
 using Animalis.Enemies;
@@ -17,6 +18,11 @@ namespace Animalis.Run
         [SerializeField] private RunFlowController runFlow;
         [SerializeField] private EnemySpawnDirector enemySpawnDirector;
         [SerializeField] private InfiniteChunkMap chunkMap;
+        [SerializeField] private RunEndView runEndView;
+        [SerializeField] private string gameplaySceneName = "Gameplay";
+        [SerializeField] private string menuSceneName = "MainMenu";
+
+        private bool _runStarted;
 
         private void Start()
         {
@@ -24,6 +30,29 @@ namespace Animalis.Run
             {
                 return;
             }
+
+            CharacterDefinition selectedCharacter = RunSelectionState.SelectedCharacter != null
+                ? RunSelectionState.SelectedCharacter
+                : configuration.StartingCharacter;
+
+            StartRun(selectedCharacter);
+        }
+
+        public void StartRun(CharacterDefinition selectedCharacter)
+        {
+            if (_runStarted)
+            {
+                return;
+            }
+
+            CharacterDefinition character = selectedCharacter != null ? selectedCharacter : configuration.StartingCharacter;
+            if (character == null)
+            {
+                Debug.LogWarning("Gameplay bootstrap cannot start without a selected character.", this);
+                return;
+            }
+
+            _runStarted = true;
 
             StageDefinition currentStage = configuration.StartingStage;
             if (currentStage != null)
@@ -33,7 +62,7 @@ namespace Animalis.Run
 
             Vector3 spawnPosition = playerSpawnPoint != null ? playerSpawnPoint.position : Vector3.zero;
             GameObject playerInstance = Instantiate(configuration.PlayerPrefab, spawnPosition, Quaternion.identity, playerParent);
-            playerInstance.name = $"{configuration.StartingCharacter.DisplayName} Player";
+            playerInstance.name = $"{character.DisplayName} Player";
 
             PlayerStatsRuntime stats = playerInstance.GetComponent<PlayerStatsRuntime>();
             PlayerAvatarView avatar = playerInstance.GetComponent<PlayerAvatarView>();
@@ -42,17 +71,17 @@ namespace Animalis.Run
 
             if (stats != null)
             {
-                stats.Initialize(configuration.StartingCharacter);
+                stats.Initialize(character);
             }
 
             if (avatar != null)
             {
-                avatar.Apply(configuration.StartingCharacter);
+                avatar.Apply(character);
             }
 
             if (autoWeapon != null)
             {
-                autoWeapon.Initialize(configuration.StartingCharacter, projectileParent);
+                autoWeapon.Initialize(character, projectileParent);
             }
 
             if (experience != null)
@@ -69,10 +98,31 @@ namespace Animalis.Run
                 Debug.LogWarning("Gameplay bootstrap is missing a HUD reference. Gameplay will continue without HUD binding.", this);
             }
 
+            Canvas canvas = ResolveCanvas();
+            if (experience != null && autoWeapon != null)
+            {
+                LevelUpController levelUpController = playerInstance.GetComponent<LevelUpController>();
+                if (levelUpController == null)
+                {
+                    levelUpController = playerInstance.AddComponent<LevelUpController>();
+                }
+
+                levelUpController.Initialize(experience, autoWeapon, configuration.ContentCatalog, canvas);
+            }
+
             if (runFlow != null)
             {
                 runFlow.Configure(currentStage, configuration.RunDefinition);
                 runFlow.RegisterPlayer(playerInstance);
+                RunEndView endView = ResolveRunEndView(canvas);
+                if (endView != null)
+                {
+                    endView.Initialize(runFlow, gameplaySceneName, menuSceneName);
+                }
+                else
+                {
+                    Debug.LogWarning("Gameplay bootstrap could not find a RunEndView or RunEndPanel in the scene.", this);
+                }
             }
             else
             {
@@ -99,6 +149,61 @@ namespace Animalis.Run
             }
         }
 
+        private Canvas ResolveCanvas()
+        {
+            if (hud != null)
+            {
+                Canvas hudCanvas = hud.GetComponentInParent<Canvas>();
+                if (hudCanvas != null)
+                {
+                    return hudCanvas;
+                }
+            }
+
+            return FindFirstObjectByType<Canvas>();
+        }
+
+        private RunEndView ResolveRunEndView(Canvas canvas)
+        {
+            if (runEndView != null)
+            {
+                return runEndView;
+            }
+
+            RunEndView sceneView = FindFirstObjectByType<RunEndView>(FindObjectsInactive.Include);
+            if (sceneView != null)
+            {
+                return sceneView;
+            }
+
+            Transform panel = canvas != null ? FindChildByName(canvas.transform, "RunEndPanel") : null;
+            return panel != null ? panel.GetComponent<RunEndView>() : null;
+        }
+
+        private static Transform FindChildByName(Transform root, string childName)
+        {
+            if (root == null)
+            {
+                return null;
+            }
+
+            if (root.name == childName)
+            {
+                return root;
+            }
+
+            for (int i = 0; i < root.childCount; i++)
+            {
+                Transform match = FindChildByName(root.GetChild(i), childName);
+                if (match != null)
+                {
+                    return match;
+                }
+            }
+
+            return null;
+        }
+
         private bool HasCriticalReferences()
         {
             if (configuration == null)
@@ -107,9 +212,15 @@ namespace Animalis.Run
                 return false;
             }
 
-            if (configuration.StartingCharacter == null)
+            if (configuration.ContentCatalog == null)
             {
-                Debug.LogWarning("Gameplay bootstrap configuration is missing the starting character.", this);
+                Debug.LogWarning("Gameplay bootstrap configuration is missing the content catalog.", this);
+                return false;
+            }
+
+            if (!HasSelectableCharacter())
+            {
+                Debug.LogWarning("Gameplay bootstrap requires at least one character in the catalog or a starting character fallback.", this);
                 return false;
             }
 
@@ -132,6 +243,30 @@ namespace Animalis.Run
             }
 
             return true;
+        }
+
+        private bool HasSelectableCharacter()
+        {
+            if (configuration.StartingCharacter != null)
+            {
+                return true;
+            }
+
+            IReadOnlyList<CharacterDefinition> characters = configuration.ContentCatalog != null ? configuration.ContentCatalog.Characters : null;
+            if (characters == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < characters.Count; i++)
+            {
+                if (characters[i] != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

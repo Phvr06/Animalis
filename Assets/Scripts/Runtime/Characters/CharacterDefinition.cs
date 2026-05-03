@@ -17,6 +17,8 @@ namespace Animalis.Characters
         [Min(0f)]
         [Tooltip("Pickup magnet radius used for XP and future collectibles.")]
         [SerializeField] private float pickupRadius = 1.25f;
+        [Tooltip("Elemental affinity used for starting weapons and future off-element rules.")]
+        [SerializeField] private ElementType affinity = ElementType.Fire;
         [Tooltip("Weapon asset that defines projectile, damage, cooldown and range.")]
         [SerializeField] private WeaponDefinition startingWeapon;
 
@@ -32,6 +34,7 @@ namespace Animalis.Characters
         public float MaxHealth => maxHealth;
         public float MoveSpeed => moveSpeed;
         public float PickupRadius => pickupRadius;
+        public ElementType Affinity => affinity;
         public WeaponDefinition StartingWeapon => startingWeapon;
         public Sprite WorldSprite => worldSprite;
         public Color WorldColor => worldColor;

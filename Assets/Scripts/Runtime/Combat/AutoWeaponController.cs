@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Animalis.Characters;
+using Animalis.Content;
 using Animalis.Core;
 using Animalis.Player;
 using UnityEngine;
@@ -20,22 +21,30 @@ namespace Animalis.Combat
 
         private IObjectPool<Projectile> _projectilePool;
         private ContactFilter2D _targetFilter;
-        private WeaponDefinition _weaponDefinition;
+        private WeaponRuntimeState _activeWeaponState;
         private float _cooldown;
+
+        public WeaponRuntimeState ActiveWeaponState => _activeWeaponState;
 
         public void Initialize(CharacterDefinition definition, Transform runtimeProjectileParent)
         {
             runtimeStats = runtimeStats != null ? runtimeStats : GetComponent<PlayerStatsRuntime>();
             projectileParent = runtimeProjectileParent;
-            _weaponDefinition = ResolveWeaponDefinition(definition);
+            WeaponDefinition weaponDefinition = ResolveWeaponDefinition(definition);
 
-            if (_weaponDefinition == null || _weaponDefinition.ProjectilePrefab == null)
+            if (weaponDefinition == null || weaponDefinition.ProjectilePrefab == null)
             {
                 return;
             }
 
+            _activeWeaponState = new WeaponRuntimeState(weaponDefinition);
             _projectilePool = new ObjectPool<Projectile>(CreateProjectile, OnGetProjectile, OnReleaseProjectile, OnDestroyProjectile);
-            _cooldown = _weaponDefinition.FireInterval;
+            _cooldown = _activeWeaponState.FireInterval;
+        }
+
+        public bool ApplyUpgrade(UpgradeDefinition upgrade)
+        {
+            return _activeWeaponState != null && _activeWeaponState.ApplyUpgrade(upgrade);
         }
 
         private void Awake()
@@ -50,7 +59,7 @@ namespace Animalis.Combat
 
         private void Update()
         {
-            if (_weaponDefinition == null || _projectilePool == null || runtimeStats == null || !runtimeStats.IsAlive)
+            if (_activeWeaponState == null || _projectilePool == null || runtimeStats == null || !runtimeStats.IsAlive)
             {
                 return;
             }
@@ -67,12 +76,12 @@ namespace Animalis.Combat
             }
 
             FireAt(targetPosition);
-            _cooldown = _weaponDefinition.FireInterval;
+            _cooldown = _activeWeaponState.FireInterval;
         }
 
         private bool TryFindNearestEnemy(out Vector2 targetPosition)
         {
-            int count = Physics2D.OverlapCircle((Vector2)transform.position, _weaponDefinition.TargetRange, _targetFilter, _targetBuffer);
+            int count = Physics2D.OverlapCircle((Vector2)transform.position, _activeWeaponState.Definition.TargetRange, _targetFilter, _targetBuffer);
             float bestDistance = float.MaxValue;
             targetPosition = default;
 
@@ -106,16 +115,16 @@ namespace Animalis.Combat
                 direction = Vector2.right;
             }
 
-            origin += direction * _weaponDefinition.MuzzleOffset.x;
-            origin += Vector2.up * _weaponDefinition.MuzzleOffset.y;
+            origin += direction * _activeWeaponState.Definition.MuzzleOffset.x;
+            origin += Vector2.up * _activeWeaponState.Definition.MuzzleOffset.y;
 
             Projectile projectile = _projectilePool.Get();
-            projectile.Launch(_weaponDefinition, origin, direction, gameObject, ReleaseProjectile);
+            projectile.Launch(_activeWeaponState, origin, direction, gameObject, ReleaseProjectile);
         }
 
         private Projectile CreateProjectile()
         {
-            Projectile projectile = Instantiate(_weaponDefinition.ProjectilePrefab, projectileParent);
+            Projectile projectile = Instantiate(_activeWeaponState.Definition.ProjectilePrefab, projectileParent);
             projectile.gameObject.SetActive(false);
             return projectile;
         }
@@ -178,13 +187,13 @@ namespace Animalis.Combat
 
         private void OnDrawGizmosSelected()
         {
-            if (_weaponDefinition == null)
+            if (_activeWeaponState == null || _activeWeaponState.Definition == null)
             {
                 return;
             }
 
             Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(transform.position, _weaponDefinition.TargetRange);
+            Gizmos.DrawWireSphere(transform.position, _activeWeaponState.Definition.TargetRange);
         }
 
         private void Reset()

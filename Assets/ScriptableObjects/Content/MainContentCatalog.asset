@@ -16,6 +16,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ca97e7e19bfd3dcc3a1e5f92b5fac670, type: 2}
   weapons:
   - {fileID: 11400000, guid: 743feefb314800c7d869762fc3e8ac9c, type: 2}
+  upgrades:
+  - {fileID: 11400000, guid: a90f081cafed4ba78e987f629d64f5b1, type: 2}
+  - {fileID: 11400000, guid: bf80ad64d4074a17a6cf5df4e2dea8ac, type: 2}
+  - {fileID: 11400000, guid: 4810c92e3cf04f379e80d41a735dec1f, type: 2}
+  - {fileID: 11400000, guid: 6ec84931644e4666a96dee40defacdc8, type: 2}
   enemies:
   - {fileID: 11400000, guid: 2d07a6e2b30a4a35a77983a8a476fa01, type: 2}
   - {fileID: 11400000, guid: 9f543a6e8db74db6a6e00d6f3e9a6b21, type: 2}

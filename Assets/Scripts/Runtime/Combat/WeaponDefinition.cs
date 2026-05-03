@@ -6,6 +6,10 @@ namespace Animalis.Combat
     [CreateAssetMenu(menuName = "Animalis/Data/Weapon", fileName = "NewWeapon")]
     public sealed class WeaponDefinition : ContentDefinition
     {
+        [Header("Identity")]
+        [SerializeField] private ElementType element = ElementType.Fire;
+        [SerializeField] private WeaponCategory category = WeaponCategory.Elemental;
+
         [Header("Projectile")]
         [Tooltip("Prefab instantiated by the auto-weapon system.")]
         [SerializeField] private Projectile projectilePrefab;
@@ -37,7 +41,32 @@ namespace Animalis.Combat
         [Tooltip("Spawn offset of the projectile relative to the player.")]
         [SerializeField] private Vector2 muzzleOffset = new(0.45f, 0f);
 
+        [Header("Fire Status")]
+        [Min(0f)]
+        [SerializeField] private float burnDamagePerSecond = 1f;
+        [Min(0f)]
+        [SerializeField] private float burnDuration = 3f;
+
+        [Header("Fire Upgrades")]
+        [Range(0f, 1f)]
+        [SerializeField] private float chainExplosionChance;
+        [Min(0f)]
+        [SerializeField] private float chainExplosionRadius = 2.25f;
+        [Min(0f)]
+        [SerializeField] private float chainExplosionDamage = 3f;
+        [SerializeField] private bool fireTrailEnabled;
+        [Min(0f)]
+        [SerializeField] private float fireTrailDamagePerSecond = 1f;
+        [Min(0.05f)]
+        [SerializeField] private float fireTrailDuration = 1.1f;
+        [Min(0.1f)]
+        [SerializeField] private float fireTrailRadius = 0.85f;
+        [Min(0.05f)]
+        [SerializeField] private float fireTrailSpawnInterval = 0.18f;
+
         public string WeaponId => ContentId;
+        public ElementType Element => element;
+        public WeaponCategory Category => category;
         public Projectile ProjectilePrefab => projectilePrefab;
         public bool UseProjectileSprite => useProjectileSprite;
         public Sprite ProjectileSprite => projectileSprite;
@@ -49,6 +78,16 @@ namespace Animalis.Combat
         public float FireInterval => fireInterval;
         public float TargetRange => targetRange;
         public Vector2 MuzzleOffset => muzzleOffset;
+        public float BurnDamagePerSecond => burnDamagePerSecond;
+        public float BurnDuration => burnDuration;
+        public float ChainExplosionChance => chainExplosionChance;
+        public float ChainExplosionRadius => chainExplosionRadius;
+        public float ChainExplosionDamage => chainExplosionDamage;
+        public bool FireTrailEnabled => fireTrailEnabled;
+        public float FireTrailDamagePerSecond => fireTrailDamagePerSecond;
+        public float FireTrailDuration => fireTrailDuration;
+        public float FireTrailRadius => fireTrailRadius;
+        public float FireTrailSpawnInterval => fireTrailSpawnInterval;
 
         private void OnValidate()
         {
@@ -60,6 +99,15 @@ namespace Animalis.Combat
             projectileDamage = Mathf.Max(0.1f, projectileDamage);
             fireInterval = Mathf.Max(0.05f, fireInterval);
             targetRange = Mathf.Max(0.5f, targetRange);
+            burnDamagePerSecond = Mathf.Max(0f, burnDamagePerSecond);
+            burnDuration = Mathf.Max(0f, burnDuration);
+            chainExplosionChance = Mathf.Clamp01(chainExplosionChance);
+            chainExplosionRadius = Mathf.Max(0f, chainExplosionRadius);
+            chainExplosionDamage = Mathf.Max(0f, chainExplosionDamage);
+            fireTrailDamagePerSecond = Mathf.Max(0f, fireTrailDamagePerSecond);
+            fireTrailDuration = Mathf.Max(0.05f, fireTrailDuration);
+            fireTrailRadius = Mathf.Max(0.1f, fireTrailRadius);
+            fireTrailSpawnInterval = Mathf.Max(0.05f, fireTrailSpawnInterval);
         }
     }
 }

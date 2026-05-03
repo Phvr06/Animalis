@@ -13,10 +13,12 @@ namespace Animalis.Content
         [Header("Content")]
         [SerializeField] private List<CharacterDefinition> characters = new();
         [SerializeField] private List<WeaponDefinition> weapons = new();
+        [SerializeField] private List<UpgradeDefinition> upgrades = new();
         [SerializeField] private List<EnemyDefinition> enemies = new();
 
         public IReadOnlyList<CharacterDefinition> Characters => characters;
         public IReadOnlyList<WeaponDefinition> Weapons => weapons;
+        public IReadOnlyList<UpgradeDefinition> Upgrades => upgrades;
         public IReadOnlyList<EnemyDefinition> Enemies => enemies;
 
         public CharacterDefinition FindCharacter(string contentId)
@@ -29,6 +31,11 @@ namespace Animalis.Content
             return FindById(weapons, contentId, definition => definition != null ? definition.WeaponId : string.Empty);
         }
 
+        public UpgradeDefinition FindUpgrade(string contentId)
+        {
+            return FindById(upgrades, contentId, definition => definition != null ? definition.UpgradeId : string.Empty);
+        }
+
         public EnemyDefinition FindEnemy(string contentId)
         {
             return FindById(enemies, contentId, definition => definition != null ? definition.EnemyId : string.Empty);
@@ -38,6 +45,7 @@ namespace Animalis.Content
         {
             characters.RemoveAll(character => character == null);
             weapons.RemoveAll(weapon => weapon == null);
+            upgrades.RemoveAll(upgrade => upgrade == null);
             enemies.RemoveAll(enemy => enemy == null);
         }
 

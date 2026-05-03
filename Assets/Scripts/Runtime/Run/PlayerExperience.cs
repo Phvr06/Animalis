@@ -8,6 +8,7 @@ namespace Animalis.Run
         [SerializeField, HideInInspector] private RunDefinition runDefinition;
 
         public event Action<int> LevelChanged;
+        public event Action<int> LevelGained;
         public event Action<int, int> ExperienceChanged;
 
         public RunDefinition RunDefinition => runDefinition;
@@ -44,6 +45,7 @@ namespace Animalis.Run
                 CurrentExperience -= requiredExperience;
                 CurrentLevel++;
                 LevelChanged?.Invoke(CurrentLevel);
+                LevelGained?.Invoke(CurrentLevel);
             }
 
             ExperienceChanged?.Invoke(CurrentExperience, ExperienceToNextLevel);

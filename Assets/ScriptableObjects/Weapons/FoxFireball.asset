@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 371f9a3b4ba3cd85fba3293dd1c5eab6, type: 3}
   m_Name: FoxFireball
   m_EditorClassIdentifier: Assembly-CSharp::Animalis.Combat.WeaponDefinition
-  contentId: fire_ball
-  displayName: Fire Ball
+  contentId: brasas_de_rebeliao
+  displayName: Brasas de Rebeliao
+  element: 1
+  category: 0
   projectilePrefab: {fileID: 3778396970352987829, guid: 7fabf362052b3f277a35dc829f01fedc, type: 3}
   useProjectileSprite: 0
   projectileSprite: {fileID: 0}
@@ -25,3 +27,13 @@ MonoBehaviour:
   fireInterval: 1
   targetRange: 8
   muzzleOffset: {x: 0.45, y: 0}
+  burnDamagePerSecond: 1
+  burnDuration: 3
+  chainExplosionChance: 0
+  chainExplosionRadius: 2.25
+  chainExplosionDamage: 3
+  fireTrailEnabled: 0
+  fireTrailDamagePerSecond: 1
+  fireTrailDuration: 1.1
+  fireTrailRadius: 0.85
+  fireTrailSpawnInterval: 0.18
