@@ -25,6 +25,12 @@ namespace Animalis.Run
                 return;
             }
 
+            StageDefinition currentStage = configuration.StartingStage;
+            if (currentStage != null)
+            {
+                StageProgressionService.EnsureStageRegistered(currentStage);
+            }
+
             Vector3 spawnPosition = playerSpawnPoint != null ? playerSpawnPoint.position : Vector3.zero;
             GameObject playerInstance = Instantiate(configuration.PlayerPrefab, spawnPosition, Quaternion.identity, playerParent);
             playerInstance.name = $"{configuration.StartingCharacter.DisplayName} Player";
@@ -65,7 +71,7 @@ namespace Animalis.Run
 
             if (runFlow != null)
             {
-                runFlow.Configure(configuration.RunDefinition);
+                runFlow.Configure(currentStage, configuration.RunDefinition);
                 runFlow.RegisterPlayer(playerInstance);
             }
             else
@@ -84,6 +90,7 @@ namespace Animalis.Run
 
             if (chunkMap != null)
             {
+                chunkMap.Configure(currentStage);
                 chunkMap.SetTarget(playerInstance.transform);
             }
             else

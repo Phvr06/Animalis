@@ -14,6 +14,8 @@ namespace Animalis.Stage
         [SerializeField] private float chunkSize = 12f;
         [Range(1, 3)]
         [SerializeField] private int visibleRadius = 2;
+        [Tooltip("Optional stage reference used to override visual generation in future maps.")]
+        [SerializeField] private StageDefinition stageDefinition;
         [Tooltip("Editable visual profile for the infinite map. Artists can change colors, sprites, density, and scale here.")]
         [SerializeField] private MapVisualDefinition visualDefinition;
 
@@ -22,6 +24,15 @@ namespace Animalis.Stage
         private Sprite[] _resolvedDetailSprites;
         private Sprite[] _resolvedTreeSprites;
         private Sprite[] _resolvedRockSprites;
+
+        public void Configure(StageDefinition stage)
+        {
+            stageDefinition = stage;
+            ResolveVisualSprites();
+            ClearChunks();
+            _lastCenter = new Vector2Int(int.MinValue, int.MinValue);
+            RefreshChunks(force: true);
+        }
 
         public void SetTarget(Transform runtimeTarget)
         {
@@ -110,13 +121,14 @@ namespace Animalis.Stage
 
         private void CreatePlainBackground(Transform parent)
         {
-            Sprite sprite = visualDefinition != null && visualDefinition.BackgroundSprite != null
-                ? visualDefinition.BackgroundSprite
+            MapVisualDefinition activeVisualDefinition = ActiveVisualDefinition;
+            Sprite sprite = activeVisualDefinition != null && activeVisualDefinition.BackgroundSprite != null
+                ? activeVisualDefinition.BackgroundSprite
                 : PlaceholderVisualFactory.GetSquareSprite();
             GameObject background = CreateSpriteObject(parent, "PlainGrassBackground", sprite, Vector3.zero, BackgroundSortingOrder);
 
             SpriteRenderer renderer = background.GetComponent<SpriteRenderer>();
-            renderer.color = visualDefinition != null ? visualDefinition.BackgroundColor : DefaultBackgroundColor;
+            renderer.color = activeVisualDefinition != null ? activeVisualDefinition.BackgroundColor : DefaultBackgroundColor;
             FitSpriteToWorldWidth(background.transform, sprite, chunkSize);
         }
 
@@ -237,9 +249,10 @@ namespace Animalis.Stage
 
         private void ResolveVisualSprites()
         {
-            _resolvedDetailSprites = RemoveNullSprites(visualDefinition != null ? visualDefinition.DetailSprites : null);
-            _resolvedTreeSprites = RemoveNullSprites(visualDefinition != null ? visualDefinition.TreeSprites : null);
-            _resolvedRockSprites = RemoveNullSprites(visualDefinition != null ? visualDefinition.RockSprites : null);
+            MapVisualDefinition activeVisualDefinition = ActiveVisualDefinition;
+            _resolvedDetailSprites = RemoveNullSprites(activeVisualDefinition != null ? activeVisualDefinition.DetailSprites : null);
+            _resolvedTreeSprites = RemoveNullSprites(activeVisualDefinition != null ? activeVisualDefinition.TreeSprites : null);
+            _resolvedRockSprites = RemoveNullSprites(activeVisualDefinition != null ? activeVisualDefinition.RockSprites : null);
         }
 
         private static Sprite[] RemoveNullSprites(Sprite[] sprites)
@@ -289,19 +302,33 @@ namespace Animalis.Stage
             return RandomRange(random, range.x, range.y);
         }
 
-        private float DetailCellSize => visualDefinition != null ? visualDefinition.DetailCellSize : 1f;
-        private float DetailChancePerCell => visualDefinition != null ? visualDefinition.DetailChancePerCell : 0f;
-        private Vector2 DetailScaleRange => visualDefinition != null ? visualDefinition.DetailScaleRange : Vector2.one;
-        private float DetailCellJitter => visualDefinition != null ? visualDefinition.DetailCellJitter : 0f;
-        private float TreeChancePerChunk => visualDefinition != null ? visualDefinition.TreeChancePerChunk : 0f;
-        private float RockChancePerChunk => visualDefinition != null ? visualDefinition.RockChancePerChunk : 0f;
-        private float ExtraRockChanceMultiplier => visualDefinition != null ? visualDefinition.ExtraRockChanceMultiplier : 0f;
-        private float PropPlacementRange => visualDefinition != null ? visualDefinition.PropPlacementRange : 0.42f;
-        private Vector2 TreeScaleRange => visualDefinition != null ? visualDefinition.TreeScaleRange : Vector2.one;
-        private Vector2 RockScaleRange => visualDefinition != null ? visualDefinition.RockScaleRange : Vector2.one;
-        private float StartingAreaPropClearRadius => visualDefinition != null ? visualDefinition.StartingAreaPropClearRadius : 0f;
-        private int BackgroundSortingOrder => visualDefinition != null ? visualDefinition.BackgroundSortingOrder : -30;
-        private int DetailSortingOrder => visualDefinition != null ? visualDefinition.DetailSortingOrder : -25;
-        private int PropSortingOrder => visualDefinition != null ? visualDefinition.PropSortingOrder : -6;
+        private void ClearChunks()
+        {
+            foreach (GameObject chunk in _chunks.Values)
+            {
+                if (chunk != null)
+                {
+                    Destroy(chunk);
+                }
+            }
+
+            _chunks.Clear();
+        }
+
+        private MapVisualDefinition ActiveVisualDefinition => stageDefinition != null && stageDefinition.VisualDefinition != null ? stageDefinition.VisualDefinition : visualDefinition;
+        private float DetailCellSize => ActiveVisualDefinition != null ? ActiveVisualDefinition.DetailCellSize : 1f;
+        private float DetailChancePerCell => ActiveVisualDefinition != null ? ActiveVisualDefinition.DetailChancePerCell : 0f;
+        private Vector2 DetailScaleRange => ActiveVisualDefinition != null ? ActiveVisualDefinition.DetailScaleRange : Vector2.one;
+        private float DetailCellJitter => ActiveVisualDefinition != null ? ActiveVisualDefinition.DetailCellJitter : 0f;
+        private float TreeChancePerChunk => ActiveVisualDefinition != null ? ActiveVisualDefinition.TreeChancePerChunk : 0f;
+        private float RockChancePerChunk => ActiveVisualDefinition != null ? ActiveVisualDefinition.RockChancePerChunk : 0f;
+        private float ExtraRockChanceMultiplier => ActiveVisualDefinition != null ? ActiveVisualDefinition.ExtraRockChanceMultiplier : 0f;
+        private float PropPlacementRange => ActiveVisualDefinition != null ? ActiveVisualDefinition.PropPlacementRange : 0.42f;
+        private Vector2 TreeScaleRange => ActiveVisualDefinition != null ? ActiveVisualDefinition.TreeScaleRange : Vector2.one;
+        private Vector2 RockScaleRange => ActiveVisualDefinition != null ? ActiveVisualDefinition.RockScaleRange : Vector2.one;
+        private float StartingAreaPropClearRadius => ActiveVisualDefinition != null ? ActiveVisualDefinition.StartingAreaPropClearRadius : 0f;
+        private int BackgroundSortingOrder => ActiveVisualDefinition != null ? ActiveVisualDefinition.BackgroundSortingOrder : -30;
+        private int DetailSortingOrder => ActiveVisualDefinition != null ? ActiveVisualDefinition.DetailSortingOrder : -25;
+        private int PropSortingOrder => ActiveVisualDefinition != null ? ActiveVisualDefinition.PropSortingOrder : -6;
     }
 }

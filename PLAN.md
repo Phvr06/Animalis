@@ -120,40 +120,38 @@ Dar sensação de deslocamento constante sem exigir construção manual de grand
 ## Personagens e Armas Iniciais
 
 ### Raposa - Elemento Fogo
-**Identidade:** agressividade, dano em área, queimadura, explosões.
+**Identidade:** agressividade, queimadura, explosão.
 
 **Arma inicial: Brasas de Rebelião**
-- Dispara projéteis incendiários automáticos em direção aleatória próxima aos inimigos.
+- Dispara projéteis incendiários automáticos em direção aos inimigos.
 - Ao atingir, causa dano inicial e aplica queimadura.
-- Inimigos queimando podem explodir ao morrer, atingindo outros próximos.
+- Dano inicial baixo + dano de queimadura ao longo do tempo.
 
-**Upgrades exclusivos sugeridos**
+**Upgrades elementais sugeridos**
 - **Combustão em Cadeia**: mortes de inimigos em chamas têm mais chance de explodir.
 - **Pluma Ígnea**: projéteis deixam uma trilha breve de fogo no chão.
 
 ### Porco - Elemento Terra
-**Identidade:** resistência, impacto, controle por área, combate mais pesado.
+**Identidade:** resistência, dano em área, combate pesado.
 
 **Arma inicial: Tremor de Casco**
 - Ondas de choque saem ao redor do personagem em intervalos regulares.
 - Alcance curto a médio.
 - Dano alto por acerto.
-- Ideal para segurar grupos próximos.
 
-**Upgrades exclusivos sugeridos**
+**Upgrades elementais sugeridos**
 - **Racha-Solo**: o ataque deixa fissuras que continuam causando dano por alguns segundos.
-- **Muralha Brutal**: a onda de choque ganha empurrão extra e pequena chance de atordoar.
+- **Muralha Brutal**: a onda de choque ganha chance de atordoar.
 
 ### Peru - Elemento Ar
-**Identidade:** mobilidade, precisão, controle de espaço, ataques rápidos.
+**Identidade:** mobilidade, precisão e ataques rápidos.
 
 **Arma inicial: Lâminas de Vendaval**
 - Projéteis cortantes de vento são lançados automaticamente na direção do inimigo mais próximo.
 - Alta cadência, dano moderado.
-- Chance de atravessar inimigos fracos.
-- Boa arma para manter fluxo constante de dano.
+- Chance de atravessar inimigos.
 
-**Upgrades exclusivos sugeridos**
+**Upgrades elementais sugeridos**
 - **Corrente Ascendente**: alguns disparos criam mini-redemoinhos que puxam inimigos levemente.
 - **Rajada Caçadora**: aumenta alcance e permite que projéteis procurem alvos próximos após acertar.
 
@@ -512,33 +510,36 @@ Resultado esperado já entregue:
 ---
 
 ## Dia 1 - Fundação do escopo expandido
-**Objetivo:** preparar o projeto para múltiplas armas, múltiplos mapas e dados escaláveis.
+**Objetivo:** fechar uma entrega intermediária com a Raposa/Fogo 100% funcional em um fluxo completo, enquanto a base de dados do projeto já fica pronta para expansão posterior.
+
+**Regra deste marco:** a Raposa precisa ficar completa sem depender de multi-arma, armas off-element, armas universais ou seleção de mapa. Esses sistemas entram como expansão a partir do Dia 2.
 
 ### Programador 1
 - consolidar a estrutura de dados para personagens, armas e catálogo de conteúdo
-- implementar a base do sistema de loadout com até 3 armas ativas
-- adaptar o level up para suportar opções de upgrade ou nova arma
-- integrar afinidade elemental básica para armas fora do elemento do personagem
+- fechar o level up e a aplicação de upgrades no fluxo de arma única
+- finalizar a arma inicial da Raposa/Fogo com comportamento completo
+- implementar os upgrades elementais da Raposa/Fogo totalmente funcionais
+- garantir status, dano contínuo, explosão e trilha de fogo quando aplicável
 - garantir que a seleção de personagem continue ligada aos dados
 
 ### Programador 2
-- criar estrutura de `StageDefinition` para 3 mapas
-- preparar fluxo de seleção de mapa e estado de desbloqueio
-- adaptar o sistema de run para reconhecer o mapa atual
-- separar regras de chunk e pacing por mapa
-- preparar persistência simples para unlock de mapa
+- preparar a base de `StageDefinition` pensando em 3 mapas, mas fechar o Mapa 1 primeiro
+- garantir fluxo estável de run no Mapa 1 para sustentar a entrega intermediária
+- estabilizar pacing, derrota e vitória provisória do Mapa 1
+- deixar a estrutura de chunk pronta para futura separação por mapa, sem exigir seleção de mapa ainda
+- preparar a base de persistência sem tornar unlock de mapas pré-requisito deste marco
 
 ### Artistas/Designers
 - atualizar a bíblia elemental dos personagens
-- redefinir completamente a Ovelha como personagem de Água
-- definir a fantasia e função das 3 armas universais
-- definir tema visual dos 3 mapas
-- desenhar wireframes de seleção de mapa e HUD com múltiplas armas
+- garantir apoio visual e de leitura para a Raposa/Fogo na entrega intermediária
+- definir a leitura visual da arma da Raposa e de seus upgrades elementais
+- validar o tema visual base do Mapa 1
+- redefinir completamente a Ovelha como personagem de Água em documentação
 
 ### Entregável do dia
-- projeto preparado para múltiplas armas e múltiplos mapas
-- estrutura de dados estável para continuar a produção
-- direção de design atualizada e alinhada
+- Raposa totalmente funcional com arma inicial e upgrades elementais jogáveis de ponta a ponta
+- uma run completa já pode ser validada com a Raposa no Mapa 1
+- estrutura de dados preparada para expansão futura sem bloquear a entrega intermediária
 
 ---
 
@@ -546,24 +547,33 @@ Resultado esperado já entregue:
 **Objetivo:** transformar a run em uma experiência de build funcional e iniciar a progressão entre mapas.
 
 ### Programador 1
+- implementar a base do sistema de loadout com até 3 armas ativas
+- adaptar o level up para suportar opções de upgrade ou nova arma
 - implementar desbloqueio de novas armas via level up
+- integrar afinidade elemental básica para armas fora do elemento do personagem
 - integrar as 4 armas elementais como opções secundárias off-element
 - implementar as 3 armas universais
 - impedir duplicação de arma no loadout
 - conectar upgrades de arma ao sistema de loadout
 
 ### Programador 2
+- adaptar o sistema de run para reconhecer o mapa atual
+- preparar fluxo de seleção de mapa e estado de desbloqueio
 - implementar desbloqueio sequencial dos 3 mapas
 - conectar clear de mapa a unlock do mapa seguinte
+- separar regras de chunk e pacing por mapa
 - preparar regras de spawn, elite e pacing específicas de cada mapa
 - adaptar tela de vitória para identificar qual mapa foi concluído
 - persistir progresso de mapas desbloqueados
 
 ### Artistas/Designers
+- definir a fantasia e função das 3 armas universais
+- definir tema visual dos 3 mapas
 - produzir ícones, nomes e leitura visual das 7 armas do slice
 - montar placeholders funcionais dos 3 mapas
 - ajustar HUD para exibir até 3 armas ativas
 - apoiar definição visual do fluxo de unlocks entre mapas
+- desenhar wireframes de seleção de mapa e HUD com múltiplas armas
 
 ### Entregável do dia
 - player pode fechar o mapa 1 e desbloquear o mapa 2
@@ -576,8 +586,9 @@ Resultado esperado já entregue:
 **Objetivo:** consolidar a identidade dos personagens, dos mapas e da progressão do slice.
 
 ### Programador 1
-- implementar upgrades exclusivos dos 4 personagens
-- finalizar identidade da Raposa/Fogo e do Peru/Ar com as funções invertidas
+- expandir o sistema completo da Raposa para os demais personagens
+- implementar upgrades exclusivos dos 3 personagens restantes
+- finalizar identidade jogável do Porco/Terra, do Peru/Ar e da Ovelha/Água
 - implementar kit da Ovelha/Água e sua progressão para slow ou freeze por upgrade
 - ajustar penalidade de arma off-element
 - melhorar a priorização das escolhas de level up

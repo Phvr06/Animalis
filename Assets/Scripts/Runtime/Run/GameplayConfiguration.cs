@@ -2,6 +2,7 @@ using Animalis.Characters;
 using Animalis.Content;
 using Animalis.Enemies;
 using Animalis.Pickups;
+using Animalis.Stage;
 using UnityEngine;
 
 namespace Animalis.Run
@@ -19,10 +20,14 @@ namespace Animalis.Run
         [Tooltip("Base player prefab instantiated at runtime.")]
         [SerializeField] private GameObject playerPrefab;
 
+        [Header("Stage")]
+        [Tooltip("Stage data used when gameplay starts. Future map selection can swap this reference.")]
+        [SerializeField] private StageDefinition startingStage;
+
         [Header("Enemies")]
-        [Tooltip("Enemy data used by the spawn director.")]
+        [Tooltip("Legacy fallback enemy data used when the selected stage does not define its own enemy setup.")]
         [SerializeField] private EnemyDefinition defaultEnemy;
-        [Tooltip("Enemy variants that can spawn during the run. If empty, Default Enemy is used.")]
+        [Tooltip("Legacy fallback enemy pool used when the selected stage does not define its own enemy pool.")]
         [SerializeField] private EnemyDefinition[] enemyPool;
         [Tooltip("Enemy prefab instantiated by the spawn director.")]
         [SerializeField] private EnemyController enemyPrefab;
@@ -36,10 +41,11 @@ namespace Animalis.Run
         public ContentCatalog ContentCatalog => contentCatalog;
         public CharacterDefinition StartingCharacter => startingCharacter;
         public GameObject PlayerPrefab => playerPrefab;
-        public EnemyDefinition DefaultEnemy => defaultEnemy;
-        public EnemyDefinition[] EnemyPool => enemyPool;
+        public StageDefinition StartingStage => startingStage;
+        public EnemyDefinition DefaultEnemy => startingStage != null && startingStage.DefaultEnemy != null ? startingStage.DefaultEnemy : defaultEnemy;
+        public EnemyDefinition[] EnemyPool => startingStage != null && startingStage.EnemyPool != null && startingStage.EnemyPool.Length > 0 ? startingStage.EnemyPool : enemyPool;
         public EnemyController EnemyPrefab => enemyPrefab;
         public ExperiencePickup ExperiencePickupPrefab => experiencePickupPrefab;
-        public RunDefinition RunDefinition => runDefinition;
+        public RunDefinition RunDefinition => startingStage != null && startingStage.RunDefinition != null ? startingStage.RunDefinition : runDefinition;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using Animalis.Player;
+using Animalis.Stage;
 using TMPro;
 using UnityEngine;
 
@@ -12,15 +13,25 @@ namespace Animalis.Run
         [SerializeField] private RunDefinition runDefinition;
 
         private PlayerHealth _playerHealth;
+        private StageDefinition _currentStage;
 
         public event Action<bool, float> RunEnded;
 
         public bool IsRunActive { get; private set; } = true;
         public float ElapsedSeconds { get; private set; }
 
-        public void Configure(RunDefinition definition)
+        public void Configure(StageDefinition stage, RunDefinition definition)
         {
+            _currentStage = stage;
             runDefinition = definition;
+            IsRunActive = true;
+            ElapsedSeconds = 0f;
+            Time.timeScale = 1f;
+
+            if (defeatText != null)
+            {
+                defeatText.gameObject.SetActive(false);
+            }
         }
 
         public void RegisterPlayer(GameObject player)
@@ -56,6 +67,11 @@ namespace Animalis.Run
             }
 
             ElapsedSeconds += Time.deltaTime;
+
+            if (_currentStage != null && _currentStage.HasVictoryCondition && ElapsedSeconds >= _currentStage.VictoryDurationSeconds)
+            {
+                EndRun(true);
+            }
         }
 
         private void LateUpdate()
@@ -106,10 +122,18 @@ namespace Animalis.Run
 
             IsRunActive = false;
 
-            if (!victory && defeatText != null)
+            if (defeatText != null)
             {
-                defeatText.text = $"DERROTA\nSobreviveu {Mathf.FloorToInt(ElapsedSeconds)}s";
+                defeatText.text = victory
+                    ? BuildVictoryMessage()
+                    : $"DERROTA\nSobreviveu {Mathf.FloorToInt(ElapsedSeconds)}s";
                 defeatText.gameObject.SetActive(true);
+            }
+
+            if (victory)
+            {
+                StageProgressionService.RegisterStageVictory(_currentStage);
+                Time.timeScale = 0f;
             }
 
             if ((runDefinition == null || runDefinition.PauseOnDefeat) && !victory)
@@ -118,6 +142,12 @@ namespace Animalis.Run
             }
 
             RunEnded?.Invoke(victory, ElapsedSeconds);
+        }
+
+        private string BuildVictoryMessage()
+        {
+            string stageName = _currentStage != null ? _currentStage.DisplayName : "Mapa";
+            return $"VITÓRIA\n{stageName} concluído em {Mathf.FloorToInt(ElapsedSeconds)}s";
         }
 
         private void OnDestroy()

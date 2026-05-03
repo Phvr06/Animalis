@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 737a9f357be8f7214a16276d1c357835, type: 3}
+  m_Name: OpenPastureStage
+  m_EditorClassIdentifier: Assembly-CSharp::Animalis.Stage.StageDefinition
+  contentId: open_pasture
+  displayName: Open Pasture
+  runDefinition: {fileID: 11400000, guid: 6cb5b22773228e72ab9ba3e2df5700d0, type: 2}
+  victoryDurationSeconds: 60
+  startsUnlocked: 1
+  nextStage: {fileID: 0}
+  defaultEnemy: {fileID: 11400000, guid: 2d07a6e2b30a4a35a77983a8a476fa01, type: 2}
+  enemyPool:
+  - {fileID: 11400000, guid: 2d07a6e2b30a4a35a77983a8a476fa01, type: 2}
+  - {fileID: 11400000, guid: 9f543a6e8db74db6a6e00d6f3e9a6b21, type: 2}
+  - {fileID: 11400000, guid: c2e6b93f05c54ad9b2827fd3640fcabe, type: 2}
+  visualDefinition: {fileID: 11400000, guid: d1c5b81f9ae64d64b8bde43406081522, type: 2}

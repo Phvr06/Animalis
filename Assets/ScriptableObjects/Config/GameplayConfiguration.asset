@@ -15,6 +15,7 @@ MonoBehaviour:
   contentCatalog: {fileID: 11400000, guid: a2767c92206759e739e721b74ccca6e9, type: 2}
   startingCharacter: {fileID: 11400000, guid: ca97e7e19bfd3dcc3a1e5f92b5fac670, type: 2}
   playerPrefab: {fileID: 1825252516004880071, guid: 6b12e4f623b3c4e319701f0564ff8d59, type: 3}
+  startingStage: {fileID: 11400000, guid: b34d9069a12dfdcb0b7f3f14f5fa1daf, type: 2}
   defaultEnemy: {fileID: 11400000, guid: 2d07a6e2b30a4a35a77983a8a476fa01, type: 2}
   enemyPool:
   - {fileID: 11400000, guid: 2d07a6e2b30a4a35a77983a8a476fa01, type: 2}
